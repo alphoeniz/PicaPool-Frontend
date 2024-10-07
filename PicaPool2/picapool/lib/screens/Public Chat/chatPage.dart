@@ -1,0 +1,467 @@
+import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
+
+class ChatPage extends StatefulWidget {
+  @override
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  TextEditingController _messageController = TextEditingController();
+  bool _isMessageEmpty = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+
+    _messageController.addListener(() {
+      setState(() {
+        _isMessageEmpty = _messageController.text.isEmpty;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.orange),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(
+          "KFC 50% off",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontFamily: "MontserratSB",
+          ),
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.orange,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.orange,
+          labelStyle: TextStyle(
+            fontFamily: "MontserratR", // Tab bar font style
+          ),
+          tabs: [
+            Tab(text: "Public Chat"),
+            Tab(text: "Private chats (3)"),
+          ],
+        ),
+      ),
+      body: Container(
+        color: Colors.white, // Set chat background to white
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            // Public Chat Tab
+            PublicChatView(),
+            // Private Chat Tab
+            PrivateChatView(),
+          ],
+        ),
+      ),
+      bottomNavigationBar: ChatInputField(
+        controller: _messageController,
+        isMessageEmpty: _isMessageEmpty,
+      ),
+    );
+  }
+}
+
+class PublicChatView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        ChatBubble(
+          sender: "Shreya Roy",
+          message: "Hi, I am ready to pool, \npaying 400?",
+          time: "5:30 PM",
+          isMe: false,
+          imageUrl: 'https://via.placeholder.com/150',
+          showSenderDetails: true,
+        ),
+        ChatBubble(
+          sender: "You",
+          message: "Hi, who all are willing to \npool for this offer?",
+          time: "5:31 PM",
+          isMe: true,
+          imageUrl: '',
+          showSenderDetails: false,
+        ),
+        ChatBubble(
+          sender: "Pranav",
+          message: "Hi, I am ready to pool, \npaying 400?",
+          time: "5:32 PM",
+          isMe: false,
+          imageUrl: 'https://via.placeholder.com/150',
+          showSenderDetails: true,
+        ),
+        ChatBubble(
+          sender: "Pranav",
+          message: "If you are paying 200 let \nme know",
+          time: "5:32 PM",
+          isMe: false,
+          imageUrl: 'https://via.placeholder.com/150',
+          showSenderDetails: false,
+        ),
+        // Reply message from you to Pranav at 5:34 PM
+        ChatBubble(
+          sender: "You",
+          message: "Hi, who all are willing to pool for \nthis offer?",
+          time: "5:34 PM",
+          isMe: true,
+          imageUrl: '',
+          showSenderDetails: false,
+          replyToMessage: "Hi, I am ready to pool, paying 400?",
+          replySender: "Pranav", // Specify who you are replying to
+        ),
+        // Reply message from Pranav to you at 5:36 PM
+        ChatBubble(
+          sender: "Pranav",
+          message: "Hi, I am ready to pool, \npaying 400?",
+          time: "5:36 PM",
+          isMe: false,
+          imageUrl: 'https://via.placeholder.com/150',
+          showSenderDetails: true,
+          replyToMessage: "Hi, who all are willing to pool for this offer?",
+          replySender: "You", // Specify the person being replied to
+        ),
+      ],
+    );
+  }
+}
+
+class ChatBubble extends StatelessWidget {
+  final String sender;
+  final String message;
+  final String time;
+  final bool isMe;
+  final String imageUrl;
+  final bool showSenderDetails;
+  final String? replyToMessage;
+  final String? replySender;
+
+  const ChatBubble({
+    required this.sender,
+    required this.message,
+    required this.time,
+    required this.isMe,
+    required this.imageUrl,
+    required this.showSenderDetails,
+    this.replyToMessage,
+    this.replySender,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            if (!isMe && showSenderDetails) ...[
+              CircleAvatar(
+                backgroundImage: NetworkImage(imageUrl),
+                radius: 20,
+              ),
+              SizedBox(width: 10),
+            ] else if (!isMe) ...[
+              SizedBox(width: 50),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: [
+                  if (!isMe && showSenderDetails)
+                    Text(
+                      sender,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                        fontFamily: "MontserratSB", // Sender's name font
+                      ),
+                    ),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isMe ? Color(0xFFF3D7C5) : Color(0xFFDEDEDE), // Main bubble colors
+                      borderRadius: BorderRadius.only(
+                        topLeft: isMe ? Radius.circular(10) : Radius.circular(0),
+                        topRight: Radius.circular(10),
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: isMe ? Radius.circular(0) : Radius.circular(10),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (replyToMessage != null && replySender != null)
+                          Container(
+                            margin: EdgeInsets.only(bottom: 8),
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isMe ? Color(0xFFFFE2D0) : Color(0xFFEBEBEB), // Lighter background for reply
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border(
+                                left: BorderSide(color: Colors.orange, width: 3), // Orange line to the left of reply
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  replySender!,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: "MontserratSB", // Replied sender's name font
+                                    color: isMe ? Colors.orange.shade700 : Colors.black,
+                                  ),
+                                ),
+                                SizedBox(height: 4), // Small space between name and message
+                                Text(
+                                  replyToMessage!,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: "MontserratM", // Replied message font
+                                    fontSize: 14, // Regular size for reply message
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        Text(
+                          message,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontFamily: "MontserratM", // Chat text font
+                            fontSize: 14,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          time,
+                          style: TextStyle(fontSize: 12, color: Color(0xff6C6C6C)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+class ChatInputField extends StatelessWidget {
+  final TextEditingController controller;
+  final bool isMessageEmpty;
+
+  const ChatInputField({
+    required this.controller,
+    required this.isMessageEmpty,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            // Chat input field
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    // Smiley icon
+                    Image.asset("assets/icons/Group 497.png", height: 25,),
+                    // Text input field
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        decoration: InputDecoration(
+                          hintText: '  Drag up to confirm',
+                          hintStyle: TextStyle(fontFamily: "MontserratM"),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    // Attach file icon
+                    Image.asset("assets/icons/pinselect.png", height: 25,),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 8),
+            // Send button
+            CircleAvatar(
+              radius: 25,
+              backgroundColor: Colors.orange,
+              child: IconButton(
+                icon: Icon(Icons.send, color: Colors.white),
+                onPressed: isMessageEmpty ? null : () {
+                  // Handle message send action here
+                  controller.clear(); // Clear input after sending
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PrivateChatView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              RoomTile(roomName: "Yash’s room", occupancy: "4 occupied", isJoined: false),
+              RoomTile(roomName: "Akshay’s room", occupancy: "3 occupied", isJoined: true),
+              RoomTile(roomName: "Diya’s room", occupancy: "4 occupied", isJoined: false),
+              RoomTile(roomName: "Rohan’s room", occupancy: "2 occupied", isJoined: true),
+              RoomTile(roomName: "Yash’s room", occupancy: "4 occupied", isJoined: false),
+              RoomTile(roomName: "Dhiraj’s room", occupancy: "3 occupied", isJoined: false),
+              RoomTile(roomName: "Diya’s room", occupancy: "4 occupied", isJoined: false),
+              RoomTile(roomName: "Rohan’s room", occupancy: "2 occupied", isJoined: false),
+            ],
+          ),
+        ),
+        // Create Room Button at the bottom
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: OutlinedButton.icon(
+            onPressed: () {
+              // Action for creating a room
+            },
+            icon: Icon(Icons.add, color: Colors.orange),
+            label: Text(
+              "Create room",
+              style: TextStyle(color: Colors.orange),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: Colors.orange),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class RoomTile extends StatelessWidget {
+  final String roomName;
+  final String occupancy;
+  final bool isJoined;
+
+  const RoomTile({
+    required this.roomName,
+    required this.occupancy,
+    required this.isJoined,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: CircleAvatar(
+              backgroundColor: isJoined ? Colors.grey : Colors.orange, // Color based on status
+              child: Text(
+                roomName[0],
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            title: Text(
+              roomName,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(occupancy),
+            trailing: isJoined
+                ? ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade200,
+                      side: BorderSide(color: Colors.grey),
+                    ),
+                    child: Text(
+                      "Requested",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      side: BorderSide(color: Colors.orange),
+                    ),
+                    child: Text(
+                      "Request",
+                      style: TextStyle(color: Colors.orange),
+                    ),
+                  ),
+          ),
+          // Occupancy Indicator Lines
+          Padding(
+            padding: const EdgeInsets.only(left: 56.0, top: 4.0),
+            child: Row(
+              children: [
+                Icon(Icons.circle, size: 8, color: Colors.orange),
+                SizedBox(width: 5),
+                Icon(Icons.circle, size: 8, color: Colors.orange),
+                SizedBox(width: 5),
+                Icon(Icons.circle, size: 8, color: Colors.grey.shade400),
+                SizedBox(width: 5),
+                Icon(Icons.circle, size: 8, color: Colors.grey.shade400),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
