@@ -73,19 +73,17 @@ class _LocationWidgetState extends ConsumerState<LocationWidget> {
       children: [
         InkWell(
           onTap: () {
-            var result = MaterialPageRoute(
+            debugPrint("Location tapped");
+            Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => const LocationScreen(),
-            );
+            ));
           },
           child: Container(
             alignment: Alignment.topLeft,
             width: MediaQuery.of(context).size.width * 0.75,
             child: Row(
               children: [
-                const SvgIcon(
-                  "assets/icons/location_pin.svg",
-                  size: 26,
-                ),
+                Icon(Icons.location_on, color: widget.color),
                 const SizedBox(
                   width: 8,
                 ),
@@ -104,12 +102,9 @@ class _LocationWidgetState extends ConsumerState<LocationWidget> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(
-                            width: 3,
-                          ),
-                          const SvgIcon(
-                            "assets/icons/arrow_down.svg",
-                            size: 5,
+                          Icon(
+                            Icons.arrow_drop_down_rounded,
+                            color: widget.color,
                           )
                         ],
                       ),

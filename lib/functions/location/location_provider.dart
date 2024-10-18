@@ -74,6 +74,8 @@ class LocationController extends StateNotifier<LocationState> {
         lng: position.longitude,
       );
 
+      print("Location: ${position.latitude}, ${position.longitude}");
+
       state = state.copyWith(
         location: Location(
           latitude: position.latitude,
