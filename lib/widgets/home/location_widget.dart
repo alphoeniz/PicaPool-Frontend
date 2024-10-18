@@ -1,18 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picapool/functions/location/location_provider.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/utils/svg_icon.dart';
 
-class LocationWidget extends StatelessWidget {
-  const LocationWidget({super.key, this.location});
-  final String? location;
+class LocationWidget extends ConsumerStatefulWidget {
+  const LocationWidget({
+    super.key,
+    this.color = Colors.white,
+  });
+  final Color? color;
+
+  @override
+  _LocationWidgetState createState() => _LocationWidgetState();
+}
+
+class _LocationWidgetState extends ConsumerState<LocationWidget> {
+  LocationState? state;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchLocation();
+    });
+  }
+
+  void _fetchLocation() async {
+    var locationState = ref.read(locationProvider);
+    if (locationState.location == null) {
+      await ref.read(locationProvider.notifier).getLocation();
+    } else {
+      setState(() {
+        state = locationState;
+      });
+    }
+  }
 
   String _extractMainLocation(String location) {
     // Splitting the address based on commas
     List<String> parts = location.split(',');
-    
+
     // Assuming the last part is the country, the second last is the city
     if (parts.length >= 3) {
       // This will show the second last part as the main location (like the city or major area)
@@ -28,12 +59,24 @@ class LocationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String mainLocation = location != null ? _extractMainLocation(location!) : "Locating...";
+    ref.listen<LocationState>(locationProvider, (previous, next) {
+      setState(() {
+        state = next;
+      });
+    });
+
+    String mainLocation = state != null && state!.location != null
+        ? _extractMainLocation(state?.locationName ?? "")
+        : "Locating...";
 
     return Row(
       children: [
         InkWell(
-          onTap: (){},
+          onTap: () {
+            var result = MaterialPageRoute(
+              builder: (context) => const LocationScreen(),
+            );
+          },
           child: Container(
             alignment: Alignment.topLeft,
             width: MediaQuery.of(context).size.width * 0.75,
@@ -57,7 +100,7 @@ class LocationWidget extends StatelessWidget {
                             mainLocation, // Display the main or landmark part of the location
                             style: GoogleFonts.montserrat(
                               fontSize: 16,
-                              color: Colors.white,
+                              color: widget.color,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -71,11 +114,13 @@ class LocationWidget extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        location ?? "Choose a location",
+                        state?.location == null
+                            ? "Choose a location"
+                            : mainLocation,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.montserrat(
                           fontSize: 12,
-                          color: Colors.white,
+                          color: widget.color,
                           fontWeight: FontWeight.w400,
                         ),
                       )

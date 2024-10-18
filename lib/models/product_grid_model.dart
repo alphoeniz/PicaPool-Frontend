@@ -46,7 +46,7 @@ class ProductGrid extends StatelessWidget {
       'time': '2w ago',
     },
     {
-      'image': 'assets/harrypotter.jpg',
+      'image': 'assets/images/harrypotter.jpg',
       'title': 'Harry Potter Book',
       'price': '₹400',
       'originalPrice': '₹1098',
@@ -92,8 +92,8 @@ class ProductGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: EdgeInsets.all(10),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      padding: const EdgeInsets.all(10),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
@@ -133,9 +133,9 @@ class ProductItem extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) =>  ProductDetailsPage()),
-  );
+          context,
+          MaterialPageRoute(builder: (context) => const ProductDetailsPage()),
+        );
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -152,12 +152,11 @@ class ProductItem extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: "MontserratR",
-                
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -169,12 +168,12 @@ class ProductItem extends StatelessWidget {
                   children: [
                     Text(
                       price,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: "MontserratM",
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       originalPrice,
                       style: TextStyle(
@@ -189,15 +188,15 @@ class ProductItem extends StatelessWidget {
                 ),
                 Text(
                   time,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: "MontserratM",
-                        fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.normal,
                     color: Colors.black,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
           ],
         ),
       ),

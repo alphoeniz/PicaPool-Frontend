@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/route_manager.dart';
-import 'package:http/http.dart' as http;
-import 'package:picapool/screens/otp_screen.dart';
-import 'package:picapool/screens/personal_details.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:picapool/screens/public_profile.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
+import 'package:picapool/functions/auth/auth_controller.dart'; // Import the AuthController
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
+  // Change to ConsumerStatefulWidget
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() =>
+      _LoginScreenState(); // Use ConsumerState
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   String selectedCountryCode = "91"; // Default country code
   String selectedFlag = "🇮🇳"; // Default flag for India
   final _formKey = GlobalKey<FormState>();
@@ -34,118 +31,31 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _sendOtp(String phoneNumber) async {
-    final String url = 'https://api.picapool.com/v2/otp?mobile=$phoneNumber';
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: '{}', // Sending an empty JSON object as the body
-      );
-
-      print('Status Code: ${response.statusCode}');
-      print('Response: ${response.body}');
-
-      if (response.statusCode == 201) {
-        Get.to(() => OtpScreen(phoneNumber: phoneNumber));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send OTP. Please try again.')),
-        );
-      }
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred. Please try again later.')),
-      );
-    }
+    final authController =
+        ref.read(authControllerProvider.notifier); // Get AuthController
+    await authController
+        .sendOtp(phoneNumber); // Call the method from AuthController
   }
 
   Future<void> _signInWithGoogle() async {
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
-
-      if (account != null) {
-        final GoogleSignInAuthentication googleAuth = await account.authentication;
-        print('Google Token: ${googleAuth.idToken}');
-
-        final int statusCode = await _sendGoogleTokenToServer(googleAuth.idToken!);
-        print('Google Sign-In Response Status Code: $statusCode');
-
-        if (statusCode == 200) {
-          Get.to(() => PersonalDetails());
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to sign in with Google. Please try again.')),
-          );
-        }
-      }
-    } catch (e) {
-      print('Google Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in with Google. Please try again.')),
-      );
-    }
+    final authController =
+        ref.read(authControllerProvider.notifier); // Get AuthController
+    await authController
+        .loginWithGoogle(); // Trigger Google Sign-In from AuthController
   }
 
   Future<void> _signInWithApple() async {
-    try {
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      print('Apple Identity Token: ${appleCredential.identityToken}');
-
-      // Send the token to the server and get the status code
-      final int statusCode = await _sendAppleTokenToServer(appleCredential.identityToken!);
-
-      print('Apple Sign-In Response Status Code: $statusCode');
-
-      if (statusCode == 200) {
-        Get.to(() => PersonalDetails());
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to sign in with Apple. Please try again.')),
-        );
-      }
-    } catch (e) {
-      print('Apple Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in with Apple. Please try again.')),
-      );
-    }
-  }
-
-  Future<int> _sendGoogleTokenToServer(String googleToken) async {
-    final String url = 'https://api.picapool.com/v2/auth/login/user';
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: '{"authInfo": {"googleToken": "$googleToken"}}',
-    );
-
-    return response.statusCode;
-  }
-
-  Future<int> _sendAppleTokenToServer(String appleToken) async {
-    final String url = 'https://api.picapool.com/v2/auth/login/user';
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: '{"authInfo": {"appleToken": "$appleToken"}}',
-    );
-
-    return response.statusCode;
+    final authController =
+        ref.read(authControllerProvider.notifier); // Get AuthController
+    await authController
+        .loginWithApple(); // Trigger Apple Sign-In from AuthController
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(
+        authControllerProvider); // Watch AuthState for loading and error handling
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -189,14 +99,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     Container(
                       height: 55,
                       decoration: BoxDecoration(
-                        color: Color(0xffFFFFFF),
-                        border: Border.all(color: Color(0xffA3A3A3)),
+                        color: const Color(0xffFFFFFF),
+                        border: Border.all(color: const Color(0xffA3A3A3)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: selectedCountryCode,
-                          items: [
+                          items: const [
                             DropdownMenuItem(
                               value: "91",
                               child: Row(
@@ -224,8 +134,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               selectedFlag = value == "91" ? "🇮🇳" : "🇺🇸";
                             });
                           },
-                          icon: Padding(
-                            padding: const EdgeInsets.only(right: 10.0),
+                          icon: const Padding(
+                            padding: EdgeInsets.only(right: 10.0),
                             child: Icon(Icons.arrow_drop_down,
                                 color: Color(0xffA3A3A3)),
                           ),
@@ -240,25 +150,27 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: InputDecoration(
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Color(0xffFF8D41)),
+                            borderSide:
+                                const BorderSide(color: Color(0xffFF8D41)),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Color(0xffA3A3A3)),
+                            borderSide:
+                                const BorderSide(color: Color(0xffA3A3A3)),
                           ),
                           hintText: "Ph no",
                           hintStyle: const TextStyle(
                             fontFamily: "MontserratR",
                             color: Color(0xffA3A3A3),
                           ),
-                          fillColor: Color(0xffFFFFFF),
+                          fillColor: const Color(0xffFFFFFF),
                           filled: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                           errorBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Colors.red),
+                            borderSide: const BorderSide(color: Colors.red),
                           ),
                         ),
                         inputFormatters: [
@@ -271,45 +183,34 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  "We’ll text you a code to verify you’re really you.",
-                  style: TextStyle(
-                      fontFamily: "MontserratR",
-                      color: Color(0xff757171),
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal),
-                ),
-                const Text(
-                  "Message and data rates may apply.",
-                  style: TextStyle(
-                      fontFamily: "MontserratR",
-                      color: Color(0xff757171),
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal),
-                ),
-                const SizedBox(height: 40),
+                if (authState
+                    .isLoading) // Show loading indicator if in loading state
+                  const Center(child: CircularProgressIndicator()),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      String fullPhoneNumber = "$selectedCountryCode${_phoneController.text}";
+                      String fullPhoneNumber =
+                          "$selectedCountryCode${_phoneController.text}";
                       _sendOtp(fullPhoneNumber);
                     }
                   },
-                  child: Text(
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffFF8D41)),
+                    minimumSize: WidgetStateProperty.all(
+                        const Size(double.infinity, 50)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    )),
+                  ),
+                  child: const Text(
                     "Send OTP",
                     style: TextStyle(
                       fontFamily: "MontserratSB",
                       color: Color(0xffFFFFFF),
                       fontSize: 16,
                     ),
-                  ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(Color(0xffFF8D41)),
-                    minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    )),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -344,12 +245,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Container(
                         height: 42,
                         width: 42,
-                        padding: EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xffFFFFFF),
+                          color: const Color(0xffFFFFFF),
                           border: Border.all(
-                            color: Color(0xff000000),
+                            color: const Color(0xff000000),
                             width: 1.0,
                           ),
                         ),
@@ -357,18 +258,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     if (Platform.isIOS) ...[
-                      SizedBox(width: 20),
+                      const SizedBox(width: 20),
                       GestureDetector(
                         onTap: _signInWithApple,
                         child: Container(
                           height: 42,
                           width: 42,
-                          padding: EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Color(0xffFFFFFF),
+                            color: const Color(0xffFFFFFF),
                             border: Border.all(
-                              color: Color(0xff000000),
+                              color: const Color(0xff000000),
                               width: 1.0,
                             ),
                           ),
@@ -382,53 +283,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Center(
                   child: Text("By continuing, you agree to our",
                       style: TextStyle(
-                          fontFamily: "MontserratR",
-                          color: Color(0xff757171),
-                          fontSize: 12,
-                          fontWeight: FontWeight.normal)),
+                        fontFamily: "MontserratR",
+                        color: Color(0xffA3A3A3),
+                        fontSize: 10,
+                        fontWeight: FontWeight.normal,
+                      )),
                 ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Terms of Service",
-                        style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            fontFamily: "MontserratR",
-                            color: Color(0xff757171),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(width: 10),
-                    Text("Privacy Policy",
-                        style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            fontFamily: "MontserratR",
-                            color: Color(0xff757171),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(width: 10),
-                    Text("Content policy",
-                        style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            fontFamily: "MontserratR",
-                            color: Color(0xff757171),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 50),
-                Center(
-                  child: InkWell(
-                    onTap: () {
-                      Get.to(() => PublicProfile());
-                    },
-                    child: const Text("Continue as a guest",
-                        style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            fontFamily: "MontserratR",
-                            color: Color(0xff757171),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold)),
-                  ),
+                const Center(
+                  child: Text("Terms & Conditions",
+                      style: TextStyle(
+                        fontFamily: "MontserratSB",
+                        color: Color(0xff000000),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      )),
                 ),
               ],
             ),

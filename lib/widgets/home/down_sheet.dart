@@ -4,14 +4,11 @@ import 'package:get/get_navigation/get_navigation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picapool/models/button_model.dart';
 import 'package:picapool/screens/cabs/share_cab.dart';
-import 'package:picapool/screens/create_cab.dart';
 import 'package:picapool/screens/turf/turf_first_page.dart';
-import 'package:picapool/screens/vicinity/request_vicinity.dart';
 import 'package:picapool/utils/svg_icon.dart';
 import 'package:picapool/widgets/home/bottom_modal_sheet.dart';
 import 'package:picapool/widgets/home/carousel.dart';
 import 'package:picapool/widgets/home/divider.dart';
-import 'package:picapool/widgets/home/list_categories.dart';
 import 'package:picapool/widgets/product_lists/product_lists.dart';
 
 class DownSheet extends StatefulWidget {
@@ -61,7 +58,10 @@ class _DownSheetState extends State<DownSheet> {
     {'name': 'Entertain', 'asset': 'assets/homepagebottomassets/image 42.png'},
     {'name': 'Food', 'asset': 'assets/homepagebottomassets/image 39.png'},
     {'name': 'Medicine', 'asset': 'assets/homepagebottomassets/image 43.png'},
-    {'name': 'Electronics', 'asset': 'assets/homepagebottomassets/image 44.png'},
+    {
+      'name': 'Electronics',
+      'asset': 'assets/homepagebottomassets/image 44.png'
+    },
     {'name': 'Music', 'asset': 'assets/homepagebottomassets/image 46.png'},
     {'name': 'Medicine', 'asset': 'assets/homepagebottomassets/image 43.png'},
     // Add more brands as needed
@@ -92,7 +92,6 @@ class _DownSheetState extends State<DownSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  //TODO: make reponsive for big screens
                   InkWell(
                     onTap: () {
                       Get.to(() => const CabShareScreen());
@@ -124,7 +123,7 @@ class _DownSheetState extends State<DownSheet> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ProductListsPage(),
+                          builder: (context) => const ProductListsPage(),
                         ),
                       );
                     },
@@ -231,21 +230,23 @@ class _DownSheetState extends State<DownSheet> {
                 height: 25,
               ),
               SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: brands.map((brand) => _buildBrandItem(brand)).toList(),
-                  ),
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children:
+                      brands.map((brand) => _buildBrandItem(brand)).toList(),
                 ),
-              
+              ),
+
               const SizedBox(
                 height: 25,
               ),
               SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: brands.map((brand) => _buildBrandItem(brand)).toList(),
-                  ),
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children:
+                      brands.map((brand) => _buildBrandItem(brand)).toList(),
                 ),
+              ),
               const SizedBox(
                 height: 110,
               ),
@@ -256,37 +257,35 @@ class _DownSheetState extends State<DownSheet> {
     );
   }
 }
+
 Widget _buildBrandItem(Map<String, String> brand) {
-    return GestureDetector(
-      onTap: () {
-      },
-      child: Container(
-        margin: EdgeInsets.only(right: 20),
-        child: Column(
-          children: [
-            Container(
-              width: 90,
-              height: 90,
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Image.asset(
-                  brand['asset']!,
-                  fit: BoxFit.contain,
-                ),
+  return GestureDetector(
+    onTap: () {},
+    child: Container(
+      margin: EdgeInsets.only(right: 20),
+      child: Column(
+        children: [
+          Container(
+            width: 90,
+            height: 90,
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Image.asset(
+                brand['asset']!,
+                fit: BoxFit.contain,
               ),
             ),
-            SizedBox(height: 8),
-            Text(
-              brand['name']!,
-              style: TextStyle(
-                fontSize: 12,
-                fontFamily: "MontserratR",
-              ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            brand['name']!,
+            style: TextStyle(
+              fontSize: 12,
+              fontFamily: "MontserratR",
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-
-
+    ),
+  );
+}
