@@ -1,33 +1,23 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:picapool/models/auth_model.dart';
-import 'package:picapool/models/user_model.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:picapool/models/auth_model.dart';
+import 'package:picapool/models/user_model.dart';
 
-final storageProvider = StateNotifierProvider<StorageController, StorageState>(
-  (ref) => StorageController(),
-);
+class StorageController extends GetxController {
+  // Reactive variables for Auth and User.
+  final Rx<Auth?> _auth = Rx<Auth?>(null);
+  final Rx<User?> _user = Rx<User?>(null);
 
-class StorageState {
-  final User? user;
-  final Auth? auth;
+  Auth? get auth => _auth.value;
+  User? get user => _user.value;
 
-  StorageState({this.user, this.auth});
+  bool get hasAuth => _auth.value != null && _auth.value!.accessToken != null;
+  bool get hasUser => _user.value != null;
 
-  StorageState copyWith({User? user, Auth? auth}) {
-    return StorageState(
-      user: user ?? this.user,
-      auth: auth ?? this.auth,
-    );
-  }
-
-  bool get hasAuth => auth != null && auth!.accessToken != null;
-
-  bool get hasUser => user != null;
-}
-
-class StorageController extends StateNotifier<StorageState> {
-  StorageController() : super(StorageState()) {
+  @override
+  void onInit() {
+    super.onInit();
     loadAuth();
     loadUser();
   }
@@ -37,7 +27,8 @@ class StorageController extends StateNotifier<StorageState> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String authData = jsonEncode(auth.toJson());
     await prefs.setString('auth', authData);
-    state = state.copyWith(auth: auth, user: auth.user);
+    _auth.value = auth;
+    _user.value = auth.user;
   }
 
   /// Loads the authentication information (Auth) from SharedPreferences.
@@ -47,7 +38,8 @@ class StorageController extends StateNotifier<StorageState> {
     if (authData != null) {
       Map<String, dynamic> authMap = jsonDecode(authData);
       Auth auth = Auth.fromJson(authMap);
-      state = state.copyWith(auth: auth, user: auth.user);
+      _auth.value = auth;
+      _user.value = auth.user;
     }
   }
 
@@ -55,7 +47,8 @@ class StorageController extends StateNotifier<StorageState> {
   Future<void> clearAuth() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth');
-    state = state.copyWith(auth: null, user: null);
+    _auth.value = null;
+    _user.value = null;
   }
 
   /// Saves the user data to SharedPreferences.
@@ -63,7 +56,7 @@ class StorageController extends StateNotifier<StorageState> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userData = jsonEncode(user.toJson());
     await prefs.setString('user', userData);
-    state = state.copyWith(user: user);
+    _user.value = user;
   }
 
   /// Loads the user data from SharedPreferences.
@@ -73,7 +66,7 @@ class StorageController extends StateNotifier<StorageState> {
     if (userData != null) {
       Map<String, dynamic> userMap = jsonDecode(userData);
       User user = User.fromJson(userMap);
-      state = state.copyWith(user: user);
+      _user.value = user;
     }
   }
 
@@ -81,6 +74,6 @@ class StorageController extends StateNotifier<StorageState> {
   Future<void> clearUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('user');
-    state = state.copyWith(user: null);
+    _user.value = null;
   }
 }

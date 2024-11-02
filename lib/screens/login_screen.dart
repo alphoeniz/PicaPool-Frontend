@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
-import 'package:picapool/functions/auth/auth_controller.dart'; // Import the AuthController
+import 'package:get/get.dart';
+import 'package:picapool/functions/auth/auth_controller.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  // Change to ConsumerStatefulWidget
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() =>
-      _LoginScreenState(); // Use ConsumerState
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
-  String selectedCountryCode = "91"; // Default country code
-  String selectedFlag = "🇮🇳"; // Default flag for India
+class _LoginScreenState extends State<LoginScreen> {
+  final AuthController authController = Get.find<AuthController>();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneController = TextEditingController();
+
+  String selectedCountryCode = "91";
+  String selectedFlag = "🇮🇳";
 
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
@@ -30,32 +30,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return null;
   }
 
-  Future<void> _sendOtp(String phoneNumber) async {
-    final authController =
-        ref.read(authControllerProvider.notifier); // Get AuthController
-    await authController
-        .sendOtp(phoneNumber); // Call the method from AuthController
+  void _sendOtp(String phoneNumber) async {
+    await authController.sendOtp(phoneNumber);
   }
 
-  Future<void> _signInWithGoogle() async {
-    final authController =
-        ref.read(authControllerProvider.notifier); // Get AuthController
-    await authController
-        .loginWithGoogle(); // Trigger Google Sign-In from AuthController
+  void _signInWithGoogle() async {
+    await authController.loginWithGoogle();
   }
 
-  Future<void> _signInWithApple() async {
-    final authController =
-        ref.read(authControllerProvider.notifier); // Get AuthController
-    await authController
-        .loginWithApple(); // Trigger Apple Sign-In from AuthController
+  void _signInWithApple() async {
+    await authController.loginWithApple();
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(
-        authControllerProvider); // Watch AuthState for loading and error handling
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -183,9 +171,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                if (authState
-                    .isLoading) // Show loading indicator if in loading state
-                  const Center(child: CircularProgressIndicator()),
+                Obx(() => authController.state.value.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : const SizedBox.shrink()),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
@@ -197,10 +185,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   },
                   style: ButtonStyle(
                     backgroundColor:
-                        WidgetStateProperty.all(const Color(0xffFF8D41)),
-                    minimumSize: WidgetStateProperty.all(
+                        MaterialStateProperty.all(const Color(0xffFF8D41)),
+                    minimumSize: MaterialStateProperty.all(
                         const Size(double.infinity, 50)),
-                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     )),
                   ),

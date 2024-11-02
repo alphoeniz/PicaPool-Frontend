@@ -21,11 +21,11 @@ void showCustomModalBottomSheet(BuildContext context) {
 
   // List of items with image paths, text, and corresponding destination pages
   List<Item> items = [
-    Item(imagePath: "assets/images/request_vicinity.png", text: "Request vicinity", destinationPage: RequestVicinity()),
-    Item(imagePath: "assets/images/buy_sell.png", text: "Buy and sell", destinationPage: ProductListsPage()),
+    Item(imagePath: "assets/images/request_vicinity.png", text: "Request vicinity", destinationPage: const RequestVicinity()),
+    Item(imagePath: "assets/images/buy_sell.png", text: "Buy and sell", destinationPage: const ProductListsPage()),
     Item(imagePath: "assets/images/share_a_cab.png", text: "Share a cab", destinationPage: ShareCabScreen()),
     // Item(imagePath: "assets/images/medical_help.png", text: "Medical help", destinationPage: RequestVicinityPage()),
-    Item(imagePath: "assets/images/trekking.png", text: "Trekking", destinationPage: TrekkingPage()),
+    Item(imagePath: "assets/images/trekking.png", text: "Trekking", destinationPage: const TrekkingPage()),
     Item(imagePath: "assets/images/medical_help.png", text: "Medical help", destinationPage: MedicalAttentionPage()),
     Item(imagePath: "assets/images/share_turf.png", text: "Share a turf", destinationPage: TurfPage1()),
     
@@ -37,9 +37,9 @@ void showCustomModalBottomSheet(BuildContext context) {
     builder: (BuildContext context) {
       return Container(
         width: size.width,
-        padding: EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(top: 20),
         height: size.height * 0.6,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
@@ -51,8 +51,8 @@ void showCustomModalBottomSheet(BuildContext context) {
             children: <Widget>[
               GridView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 4,
                   mainAxisSpacing: 4,
@@ -74,11 +74,11 @@ void showCustomModalBottomSheet(BuildContext context) {
                           items[index].imagePath,
                           width: size.width * 0.25,
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           items[index].text,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, fontFamily: "MontserratM", color: Colors.black),
+                          style: const TextStyle(fontSize: 12, fontFamily: "MontserratM", color: Colors.black),
                         ),
                       ],
                     ),

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picapool/functions/location/location_provider.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/utils/svg_icon.dart';
 
-class LocationWidget extends ConsumerStatefulWidget {
+class LocationWidget extends StatefulWidget {
   const LocationWidget({
     super.key,
     this.color = Colors.white,
@@ -18,8 +16,8 @@ class LocationWidget extends ConsumerStatefulWidget {
   _LocationWidgetState createState() => _LocationWidgetState();
 }
 
-class _LocationWidgetState extends ConsumerState<LocationWidget> {
-  LocationState? state;
+class _LocationWidgetState extends State<LocationWidget> {
+  final LocationController locationController = Get.find<LocationController>();
 
   @override
   void initState() {
@@ -30,13 +28,8 @@ class _LocationWidgetState extends ConsumerState<LocationWidget> {
   }
 
   void _fetchLocation() async {
-    var locationState = ref.read(locationProvider);
-    if (locationState.location == null) {
-      await ref.read(locationProvider.notifier).getLocation();
-    } else {
-      setState(() {
-        state = locationState;
-      });
+    if (locationController.state.value.location == null) {
+      await locationController.getLocation();
     }
   }
 
@@ -59,82 +52,75 @@ class _LocationWidgetState extends ConsumerState<LocationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<LocationState>(locationProvider, (previous, next) {
-      setState(() {
-        state = next;
-      });
-    });
+    return Obx(() {
+      String mainLocation = locationController.state.value.location != null
+          ? _extractMainLocation(
+              locationController.state.value.locationName ?? "")
+          : "Locating...";
 
-    String mainLocation = state != null && state!.location != null
-        ? _extractMainLocation(state?.locationName ?? "")
-        : "Locating...";
-
-    return Row(
-      children: [
-        InkWell(
-          onTap: () {
-            debugPrint("Location tapped");
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const LocationScreen(),
-            ));
-          },
-          child: Container(
-            alignment: Alignment.topLeft,
-            width: MediaQuery.of(context).size.width * 0.75,
-            child: Row(
-              children: [
-                Icon(Icons.location_on, color: widget.color),
-                const SizedBox(
-                  width: 8,
-                ),
-                Flexible(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            mainLocation, // Display the main or landmark part of the location
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16,
-                              color: widget.color,
-                              fontWeight: FontWeight.w600,
+      return Row(
+        children: [
+          InkWell(
+            onTap: () {
+              debugPrint("Location tapped");
+              Get.to(() => const LocationScreen());
+            },
+            child: Container(
+              alignment: Alignment.topLeft,
+              width: MediaQuery.of(context).size.width * 0.75,
+              child: Row(
+                children: [
+                  Icon(Icons.location_on, color: widget.color),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              mainLocation, // Display the main or landmark part of the location
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                color: widget.color,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          Icon(
-                            Icons.arrow_drop_down_rounded,
-                            color: widget.color,
-                          )
-                        ],
-                      ),
-                      Text(
-                        state?.location == null
-                            ? "Choose a location"
-                            : mainLocation,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 12,
-                          color: widget.color,
-                          fontWeight: FontWeight.w400,
+                            Icon(
+                              Icons.arrow_drop_down_rounded,
+                              color: widget.color,
+                            ),
+                          ],
                         ),
-                      )
-                    ],
+                        Text(
+                          locationController.state.value.errorMessage != null
+                              ? locationController.state.value.errorMessage!
+                              : mainLocation,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            color: widget.color,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        const Spacer(),
-        InkWell(
-          onTap: () {},
-          child: const SvgIcon(
-            "assets/icons/profile.svg",
-            size: 34,
+          const Spacer(),
+          InkWell(
+            onTap: () {},
+            child: const SvgIcon(
+              "assets/icons/profile.svg",
+              size: 34,
+            ),
           ),
-        )
-      ],
-    );
+        ],
+      );
+    });
   }
 }

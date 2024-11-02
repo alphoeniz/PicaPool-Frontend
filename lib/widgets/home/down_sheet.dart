@@ -262,24 +262,24 @@ Widget _buildBrandItem(Map<String, String> brand) {
   return GestureDetector(
     onTap: () {},
     child: Container(
-      margin: EdgeInsets.only(right: 20),
+      margin: const EdgeInsets.only(right: 20),
       child: Column(
         children: [
-          Container(
+          SizedBox(
             width: 90,
             height: 90,
             child: Padding(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               child: Image.asset(
                 brand['asset']!,
                 fit: BoxFit.contain,
               ),
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             brand['name']!,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontFamily: "MontserratR",
             ),

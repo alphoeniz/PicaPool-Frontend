@@ -1,5 +1,6 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:picapool/functions/auth/auth_api.dart';
 import 'package:picapool/functions/storage/storage_controller.dart';
@@ -10,14 +11,6 @@ import 'package:picapool/screens/personal_details.dart';
 import 'package:picapool/widgets/bottom_navbar/common_bottom_navbar.dart';
 import 'package:http/http.dart' as http;
 
-// AuthController provider using Riverpod's StateNotifier
-final authControllerProvider =
-    StateNotifierProvider<AuthController, AuthState>((ref) {
-  final storageController = ref.read(storageProvider.notifier);
-  return AuthController(storageController: storageController);
-});
-
-// Auth state class
 class AuthState {
   final Auth? auth;
   final User? user;
@@ -46,14 +39,16 @@ class AuthState {
   }
 }
 
-// AuthController class using StateNotifier
-class AuthController extends StateNotifier<AuthState> {
+class AuthController extends GetxController {
   final AuthApi _authApi = AuthApi();
-  final StorageController _storageController;
+  final StorageController _storageController = Get.find<StorageController>();
 
-  AuthController({required StorageController storageController})
-      : _storageController = storageController,
-        super(AuthState()) {
+  // Use GetX reactive variables for the auth state
+  Rx<AuthState> state = AuthState().obs;
+
+  @override
+  void onInit() {
+    super.onInit();
     _loadUserOnStartup();
   }
 
@@ -62,8 +57,8 @@ class AuthController extends StateNotifier<AuthState> {
     await _storageController.loadAuth();
     await _storageController.loadUser();
 
-    final storageState = _storageController.state;
-    state = state.copyWith(
+    final storageState = _storageController;
+    state.value = state.value.copyWith(
       auth: storageState.auth,
       user: storageState.user,
     );
@@ -71,12 +66,12 @@ class AuthController extends StateNotifier<AuthState> {
 
   /// Handle Google login and store auth and user data.
   Future<void> loginWithGoogle() async {
-    state = state.copyWith(isLoading: true);
+    state.value = state.value.copyWith(isLoading: true);
     final result = await _authApi.signInWithGoogle();
 
     result.fold(
       (fail) {
-        state = state.copyWith(
+        state.value = state.value.copyWith(
           errorMessage: fail.message,
           auth: null,
           user: null,
@@ -85,7 +80,7 @@ class AuthController extends StateNotifier<AuthState> {
       },
       (authData) async {
         await _storageController.saveAuth(authData);
-        state = state.copyWith(
+        state.value = state.value.copyWith(
           auth: authData,
           user: authData.user,
           errorMessage: '',
@@ -93,17 +88,17 @@ class AuthController extends StateNotifier<AuthState> {
         checkForExistingUser();
       },
     );
-    state = state.copyWith(isLoading: false);
+    state.value = state.value.copyWith(isLoading: false);
   }
 
   /// Handle Apple login and store auth and user data.
   Future<void> loginWithApple() async {
-    state = state.copyWith(isLoading: true);
+    state.value = state.value.copyWith(isLoading: true);
     final result = await _authApi.signInWithApple();
 
     result.fold(
       (fail) {
-        state = state.copyWith(
+        state.value = state.value.copyWith(
           errorMessage: fail.message,
           auth: null,
           user: null,
@@ -112,7 +107,7 @@ class AuthController extends StateNotifier<AuthState> {
       },
       (authData) async {
         await _storageController.saveAuth(authData);
-        state = state.copyWith(
+        state.value = state.value.copyWith(
           auth: authData,
           user: authData.user,
           errorMessage: '',
@@ -120,7 +115,7 @@ class AuthController extends StateNotifier<AuthState> {
         checkForExistingUser();
       },
     );
-    state = state.copyWith(isLoading: false);
+    state.value = state.value.copyWith(isLoading: false);
   }
 
   Future<void> sendOtp(String phoneNumber) async {
@@ -139,12 +134,11 @@ class AuthController extends StateNotifier<AuthState> {
       if (response.statusCode == 201) {
         Get.to(() => OtpScreen(phoneNumber: phoneNumber));
       } else {
-        if (mounted) {
-          (
-            const SnackBar(
-                content: Text('Failed to send OTP. Please try again.')),
-          );
-        }
+        Get.snackbar(
+          'Error',
+          'Failed to send OTP. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
       debugPrint('Error: $e');
@@ -154,24 +148,25 @@ class AuthController extends StateNotifier<AuthState> {
 
   /// Updates the user data and stores it.
   Future<void> updateUser(Map<String, dynamic> updateValues) async {
-    state = state.copyWith(isLoading: true);
+    state.value = state.value.copyWith(isLoading: true);
 
     try {
       final result = await _authApi.updateUser(
         updateValues,
-        state.auth!.accessToken!,
-        id: state.user!.id,
+        state.value.auth!.accessToken!,
+        id: state.value.user!.id,
       );
 
       result.fold(
         (fail) {
-          state = state.copyWith(errorMessage: fail.message);
+          state.value = state.value.copyWith(errorMessage: fail.message);
           showErrorDialog(fail.message);
         },
         (updatedUser) async {
-          state.user!.update(updateValues);
-          await _storageController.saveUser(state.user!);
-          state = state.copyWith(user: state.user, errorMessage: '');
+          state.value.user!.update(updateValues);
+          await _storageController.saveUser(state.value.user!);
+          state.value =
+              state.value.copyWith(user: state.value.user, errorMessage: '');
         },
       );
     } catch (e) {
@@ -179,21 +174,21 @@ class AuthController extends StateNotifier<AuthState> {
       showErrorDialog('Failed to update user. Please try again.');
     }
 
-    state = state.copyWith(isLoading: false);
+    state.value = state.value.copyWith(isLoading: false);
   }
 
   /// Logs out the user and clears the stored auth and user data.
   Future<void> logout() async {
     await _storageController.clearUser();
     await _storageController.clearAuth();
-    state = state.copyWith(auth: null, user: null);
+    state.value = state.value.copyWith(auth: null, user: null);
   }
 
   /// Check if a user is logged in and navigate accordingly.
   void checkForExistingUser() {
-    if (state.auth == null) {
+    if (state.value.auth == null) {
       return;
-    } else if (state.user == null || state.user!.name == null) {
+    } else if (state.value.user == null || state.value.user!.name == null) {
       Get.to(() => const PersonalDetails());
     } else {
       Get.offAll(() => const NewBottomBar());
@@ -218,5 +213,40 @@ class AuthController extends StateNotifier<AuthState> {
         ],
       ),
     );
+  }
+
+  Future<bool> updateAccessToken() async {
+    print('REQUESTED FOR UPDATE ACCESS TOKEN');
+    String rt = state.value.auth!.refreshToken!;
+    String at = state.value.auth!.accessToken!;
+    var user = state.value.user?.id;
+    if (user == null) {
+      return false;
+    }
+
+    final response = await http.post(
+      Uri.parse("https://api.picapool.com/v2/auth/accessToken"),
+      body: jsonEncode({"refreshToken": rt}),
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer $at',
+      },
+    );
+    print('UPDATE ACCESS TOKEN RESPONSE CODE : ${response.statusCode}');
+
+    if (response.statusCode < 300) {
+      String newAccessToken = response.body.toString();
+
+      state.value = state.value.copyWith(
+        auth: state.value.auth!.copyWith(accessToken: newAccessToken),
+      );
+      await _storageController.saveAuth(state.value.auth!);
+      return true;
+    } else if (response.statusCode == 401) {
+      return false;
+    } else {
+      logout();
+      return false;
+    }
   }
 }

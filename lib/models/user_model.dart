@@ -11,6 +11,9 @@ class User {
   final int id;
   String? name;
   String? pic;
+  int? age;
+  String? gender;
+  String? username;
   String? bio;
   String? location; // You might need to handle Point separately
   String? fcmToken;
@@ -30,6 +33,9 @@ class User {
     required this.id,
     this.name,
     this.pic,
+    this.age,
+    this.gender,
+    this.username,
     this.bio,
     this.location,
     this.fcmToken,
@@ -52,6 +58,9 @@ class User {
       id: json['id'],
       name: json['name'],
       pic: json['pic'],
+      age: json['age'],
+      gender: json['gender'],
+      username: json['username'],
       bio: json['bio'],
       location: json['location'],
       fcmToken: json['fcmToken'],
@@ -82,6 +91,9 @@ class User {
       'id': id,
       'name': name,
       'pic': pic,
+      'age': age,
+      'gender': gender,
+      'username': username,
       'bio': bio,
       'location': location,
       'fcmToken': fcmToken,
@@ -103,6 +115,9 @@ class User {
   void update(Map<String, dynamic> fields) {
     name = fields['name'] ?? name;
     pic = fields['pic'] ?? pic;
+    age = fields['age'] ?? age;
+    gender = fields['gender'] ?? gender;
+    username = fields['username'] ?? username;
     bio = fields['bio'] ?? bio;
     location = fields['location'] ?? location;
     fcmToken = fields['fcmToken'] ?? fcmToken;

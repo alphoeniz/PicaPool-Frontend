@@ -95,6 +95,36 @@ class Auth {
       'accessToken': accessToken,
     };
   }
+
+  Auth copyWith({
+    String? googleSub,
+    String? appleSub,
+    String? mobile,
+    String? refreshToken,
+    String? accessToken,
+    Admin? admin,
+    Partner? partner,
+    User? user,
+    LivePartner? livePartner,
+    List<Role>? roles,
+    bool? isNew,
+    bool? isGuest,
+  }) {
+    return Auth(
+      googleSub: googleSub ?? this.googleSub,
+      appleSub: appleSub ?? this.appleSub,
+      mobile: mobile ?? this.mobile,
+      refreshToken: refreshToken ?? this.refreshToken,
+      accessToken: accessToken ?? this.accessToken,
+      admin: admin ?? this.admin,
+      partner: partner ?? this.partner,
+      user: user ?? this.user,
+      livePartner: livePartner ?? this.livePartner,
+      roles: roles ?? this.roles,
+      isNew: isNew ?? this.isNew,
+      isGuest: isGuest ?? this.isGuest,
+    );
+  }
 }
 
 class Token {

@@ -1,11 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart' as geo;
-
-final locationProvider =
-    StateNotifierProvider<LocationController, LocationState>(
-  (ref) => LocationController(),
-);
 
 class LocationState {
   final Location? location;
@@ -35,58 +31,80 @@ class LocationState {
   }
 }
 
-// Create a LocationController to manage the location logic
-class LocationController extends StateNotifier<LocationState> {
-  LocationController() : super(LocationState());
+class LocationController extends GetxController {
+  // Reactive state variable
+  Rx<LocationState> state = LocationState().obs;
 
   // Request permission and fetch the current location
   Future<void> getLocation() async {
-    state = state.copyWith(isLoading: true);
+    state.value = state.value.copyWith(isLoading: true);
 
     bool serviceEnabled;
     geo.LocationPermission permission;
+
     try {
+      // Check if location services are enabled
       serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
+        state.value = state.value.copyWith(
+          isLoading: false,
+          errorMessage: 'Location services are disabled.',
+        );
         return;
       }
 
+      // Check and request location permissions
       permission = await geo.Geolocator.checkPermission();
       if (permission == geo.LocationPermission.denied) {
         permission = await geo.Geolocator.requestPermission();
         if (permission == geo.LocationPermission.denied) {
+          state.value = state.value.copyWith(
+            isLoading: false,
+            errorMessage: 'Location permission not granted.',
+          );
           return;
         }
       }
 
       if (permission == geo.LocationPermission.deniedForever) {
+        state.value = state.value.copyWith(
+          isLoading: false,
+          errorMessage:
+              'Location permissions are permanently denied, we cannot request permissions.',
+        );
         return;
       }
 
+      // Get the current location
       geo.Position position = await geo.Geolocator.getCurrentPosition(
-          locationSettings: const geo.LocationSettings(
-        accuracy: geo.LocationAccuracy.high,
-        distanceFilter: 10,
-      ));
+        locationSettings: const geo.LocationSettings(
+          accuracy: geo.LocationAccuracy.high,
+          distanceFilter: 10,
+        ),
+      );
 
+      // Get address from lat and lng
       await getAddressFromLatLng(
         lat: position.latitude,
         lng: position.longitude,
       );
 
-      print("Location: ${position.latitude}, ${position.longitude}");
+      // Print the location for debugging
+      debugPrint("Location: ${position.latitude}, ${position.longitude}");
 
-      state = state.copyWith(
+      // Update state with location and timestamp
+      state.value = state.value.copyWith(
         location: Location(
           latitude: position.latitude,
           longitude: position.longitude,
-          timestamp: DateTime.timestamp(),
+          timestamp: DateTime.now(), // Corrected timestamp
         ),
         isLoading: false,
       );
     } catch (e) {
-      print(e);
-      state = state.copyWith(
+      // Handle any errors
+      debugPrint(e.toString());
+      state.value = state.value.copyWith(
         isLoading: false,
         errorMessage: 'Failed to get location: ${e.toString()}',
       );
@@ -104,42 +122,10 @@ class LocationController extends StateNotifier<LocationState> {
       String address =
           "${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}";
 
-      state = state.copyWith(locationName: address);
-      print("Added location name");
+      state.value = state.value.copyWith(locationName: address);
+      debugPrint("Added location name");
     } else {
-      state = state.copyWith(locationName: "Unknown location");
+      state.value = state.value.copyWith(locationName: "Unknown location");
     }
   }
-
-  // Future<void> getLocation() async {
-  //   state = state.copyWith(isLoading: true);
-
-  //   try {
-  //     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //     if (!serviceEnabled) {
-  //       serviceEnabled = await Geolocator.requestPermission();
-  //       if (!serviceEnabled) {
-  //         throw Exception('Location services are disabled.');
-  //       }
-  //     }
-
-  //     PermissionStatus permissionGranted =
-  //         await _locationService.hasPermission();
-  //     if (permissionGranted == PermissionStatus.denied) {
-  //       permissionGranted = await _locationService.requestPermission();
-  //       if (permissionGranted != PermissionStatus.granted) {
-  //         throw Exception('Location permission not granted.');
-  //       }
-  //     }
-
-  //     final locationData = await _locationService.getLocation();
-
-  //     state = state.copyWith(location: locationData, isLoading: false, locationName: locationData.);
-  //   } catch (e) {
-  //     state = state.copyWith(
-  //       isLoading: false,
-  //       errorMessage: 'Failed to get location: ${e.toString()}',
-  //     );
-  //   }
-  // }
 }

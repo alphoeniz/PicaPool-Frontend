@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:picapool/models/product_grid_model.dart';
-import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/utils/svg_icon.dart';
 import 'package:picapool/widgets/Sell_Form_Page0.dart';
 import 'package:picapool/widgets/home/location_widget.dart';
@@ -13,8 +12,6 @@ class ProductListsPage extends StatefulWidget {
 }
 
 class ProductListsPageState extends State<ProductListsPage> {
-  String currentLocation = "6th st, Connaught place, New Delhi, India";
-
   // List of categories and corresponding icons from assets
   final List<Map<String, String>> categories = [
     {"name": "Electronics", "icon": "assets/icons/electronics.svg"},
@@ -29,6 +26,7 @@ class ProductListsPageState extends State<ProductListsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
       // bottomNavigationBar: NewBottomBarProduct(),
       floatingActionButton: FloatingActionButton(
           shape: RoundedRectangleBorder(
@@ -41,9 +39,11 @@ class ProductListsPageState extends State<ProductListsPage> {
           ),
           onPressed: () {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => CategorySelectionPage()));
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CategorySelectionPage(),
+              ),
+            );
           }),
       body: Stack(
         children: [

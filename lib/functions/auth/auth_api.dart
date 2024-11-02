@@ -26,6 +26,7 @@ class AuthApi implements IAuthApi {
   FutureEither<Auth> signInWithGoogle() async {
     final GoogleSignIn googleSignIn = GoogleSignIn(
       scopes: ['profile', 'email'],
+      forceCodeForRefreshToken: true,
     );
     try {
       final GoogleSignInAccount? account = await googleSignIn.signIn();
@@ -143,7 +144,7 @@ class AuthApi implements IAuthApi {
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
-      body: '{"authInfo": {"googleToken": "$googleToken"}}',
+      body: '{"authInfo": {"googleToken": "$googleToken", "appleToken": ""}}',
     );
 
     log('Google Sign-In Response: ${response.body}');
@@ -205,32 +206,6 @@ class AuthApi implements IAuthApi {
         ),
       );
     }
-  }
-
-  FutureVoid _createUser(User user) async {
-    //   try {
-    //     final response = await _createUserInDatabase(user);
-    //     response.fold((fail) {
-    //       return left(fail);
-    //     }, (user) {
-
-    //     });
-
-    //     } else {
-    //       return left(
-    //         Failure(
-    //             message:
-    //                 "Not able to create user : status code ${response.statusCode}",
-    //             stackTrace: StackTrace.current),
-    //       );
-    //     }
-    //   } catch (e) {
-    //     return left(
-    //       Failure(
-    //           message: "Failed to create user. Please try again.",
-    //           stackTrace: StackTrace.fromString(e.toString())),
-    //     );
-    //   }
   }
 
   @override
