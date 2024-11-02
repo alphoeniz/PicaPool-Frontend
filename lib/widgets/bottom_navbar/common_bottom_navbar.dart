@@ -7,6 +7,7 @@ import 'package:picapool/screens/ProfilePage/ProfilePage.dart';
 import 'package:picapool/screens/chats/chat_homeScreen.dart';
 import 'package:picapool/screens/home_screen.dart';
 import 'package:picapool/utils/svg_icon.dart';
+import 'package:picapool/widgets/home/location_widget.dart';
 
 class NewBottomBar extends StatefulWidget {
   final int currentIndex;

@@ -257,36 +257,33 @@ class _DownSheetState extends State<DownSheet> {
   }
 }
 Widget _buildBrandItem(Map<String, String> brand) {
-    return GestureDetector(
-      onTap: () {
-      },
-      child: Container(
-        margin: EdgeInsets.only(right: 20),
-        child: Column(
-          children: [
-            Container(
-              width: 90,
-              height: 90,
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Image.asset(
-                  brand['asset']!,
-                  fit: BoxFit.contain,
-                ),
+  return GestureDetector(
+    onTap: () {},
+    child: Container(
+      margin: const EdgeInsets.only(right: 20),
+      child: Column(
+        children: [
+          SizedBox(
+            width: 90,
+            height: 90,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Image.asset(
+                brand['asset']!,
+                fit: BoxFit.contain,
               ),
             ),
-            SizedBox(height: 8),
-            Text(
-              brand['name']!,
-              style: TextStyle(
-                fontSize: 12,
-                fontFamily: "MontserratR",
-              ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            brand['name']!,
+            style: const TextStyle(
+              fontSize: 12,
+              fontFamily: "MontserratR",
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-
-
+    ),
+  );
+}

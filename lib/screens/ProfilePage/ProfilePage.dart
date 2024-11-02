@@ -1,10 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import 'package:picapool/functions/auth/auth_controller.dart';
+import 'package:picapool/models/user_model.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  ProfileScreen({super.key});
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+
+  final AuthController authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
+    var user = authController.state.value.user;
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF1D0E61), // Dark blue background
       body: SafeArea(
@@ -79,8 +98,8 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "@anshhh2705",
-                        style: TextStyle(
+                        "@${user.username ?? "nousername"}",
+                        style: const TextStyle(
                           fontFamily: "MontserratR",
                           fontSize: 14,
                           color: Colors.white,
@@ -99,7 +118,8 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              _showEditProfileModal(context); // Open bottom modal
+                              _showEditProfileModal(
+                                  context, user); // Open bottom modal
                             },
                             child: Row(
                               children: [
@@ -319,7 +339,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showEditProfileModal(BuildContext context) {
+  void _showEditProfileModal(BuildContext context, User user) {
+    debugPrint(user.toJson().toString());
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -395,21 +416,53 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          _buildTextField(Icons.person, "Name", "Arman"),
+                          _buildTextField(Icons.person, "Name",
+                              _nameController..text = user.name ?? ""),
                           const Divider(thickness: 1.5),
-                          _buildTextField(Icons.info, "Username", "Morphix0882"),
+                          _buildTextField(Icons.info, "Username",
+                              _usernameController..text = user.username ?? ""),
                           const Divider(thickness: 1.5),
-                          _buildTextField(Icons.phone, "Phone", "+91 9235647729"),
-                          const Divider(thickness: 1.5),
-                          _buildTextField(Icons.email, "Email", "Arman23@gmail.com"),
+                          _buildTextField(Icons.phone, "Phone",
+                              _phoneController..text = user.auth?.mobile ?? ""),
+                          // const Divider(thickness: 1.5),
+                          // _buildTextField(
+                          //     Icons.email, "Email", "noemail@gmail.com"),
                         ],
                       ),
                     ),
                     const SizedBox(height: 30),
                     // Submit Button
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context); // Close the modal
+                      onPressed: () async {
+                        var updatedValues = <String, String>{};
+                        if (_nameController.text.isNotEmpty &&
+                            _nameController.text != user.name) {
+                          updatedValues["name"] = _nameController.text;
+                        }
+                        if (_usernameController.text.isNotEmpty &&
+                            _usernameController.text != user.username) {
+                          updatedValues["username"] = _usernameController.text;
+                        }
+                        if (_phoneController.text.isNotEmpty &&
+                            _phoneController.text != user.auth?.mobile) {
+                          updatedValues["phone"] = _phoneController.text;
+                        }
+                        if (updatedValues.isNotEmpty) {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                          );
+                          await authController.updateUser(updatedValues);
+                          if (context.mounted) {
+                            Navigator.pop(context); // Close the loading dialog
+                            Navigator.pop(context); // Close the modal
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xffFF8D41), // Orange background color
@@ -461,14 +514,15 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(IconData icon, String label, String initialValue) {
+  Widget _buildTextField(
+      IconData icon, String label, TextEditingController controller) {
     return TextField(
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: Colors.grey),
         labelText: label,
         border: InputBorder.none, // No border since the container has a border
       ),
-      controller: TextEditingController(text: initialValue),
+      controller: controller,
     );
   }
 

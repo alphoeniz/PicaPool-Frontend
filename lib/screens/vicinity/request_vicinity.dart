@@ -1,18 +1,23 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:picapool/functions/auth/auth_controller.dart';
+import 'package:http/http.dart' as http;
 
-class RequestVicinity extends StatefulWidget {
+class RequestVicinity extends ConsumerStatefulWidget {
   const RequestVicinity({super.key});
 
   @override
-  State<RequestVicinity> createState() => _RequestVicinityState();
+  ConsumerState<RequestVicinity> createState() => _RequestVicinityState();
 }
 
-class _RequestVicinityState extends State<RequestVicinity> {
+class _RequestVicinityState extends ConsumerState<RequestVicinity> {
   double _radius = 500;
   double _waitTime = 30;
   bool _isCollapsed = false;
@@ -25,10 +30,21 @@ class _RequestVicinityState extends State<RequestVicinity> {
   Circle? _currentLocationCircle;
   bool _isMapInitialized = false; // New flag to check if the map is initialized
 
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+
+  bool isLoading = false;
+  int poolingUsers = 0;
+
+  final AuthController authController = Get.find<AuthController>();
+
   @override
   void initState() {
     super.initState();
     _fetchLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getNearestUsers(authController.state.value.user!.id, 500);
+    });
   }
 
   Future<void> _fetchLocation() async {
@@ -83,7 +99,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
         _currentLocationCircle = Circle(
           circleId: const CircleId("currentLocationCircle"),
           center: _currentPosition!,
-          radius: 100,
+          radius: _radius,
           strokeColor: Colors.blue,
           strokeWidth: 2,
           fillColor: Colors.blue.withOpacity(0.3),
@@ -121,17 +137,64 @@ class _RequestVicinityState extends State<RequestVicinity> {
 
   Future<void> _pickImages() async {
     final pickedFiles = await _picker.pickMultiImage();
-    if (pickedFiles != null) {
+    if (pickedFiles.isNotEmpty) {
       setState(() {
         _imageFiles = pickedFiles.take(3).toList();
       });
     }
   }
 
+  void createVicinity() async {
+    // Call the createVicinity function from the vicinityApiProvider
+    setState(() {
+      isLoading = true;
+    });
+
+    if (_titleController.text.isEmpty || _descController.text.isEmpty) {
+      debugPrint("Please fill all the fields");
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    // final vicinityApi = ;
+
+    final offer = {
+      "name": _titleController.text,
+      "images": _imageFiles!.map((file) => file.path).toList(),
+      "desc": _descController.text,
+      "expiry": DateTime.now()
+          .add(Duration(minutes: _waitTime.toInt()))
+          .toIso8601String(),
+      "isOnline": false,
+    };
+
+    final userId =
+        authController.state.value.user?.id; // Replace with actual user ID
+    if (userId == null) {
+      setState(() {
+        isLoading = false;
+      });
+      debugPrint("User ID is null");
+      return;
+    }
+    // await vicinityApi.createVicinity(
+    //   offer: offer,
+    //   destination: _radius.toInt(),
+    //   userId: userId,
+    // );
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Column(
           children: [
@@ -157,18 +220,18 @@ class _RequestVicinityState extends State<RequestVicinity> {
                 children: [
                   Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
                         child: Row(
                           children: [
                             Expanded(
                               child: Divider(
                                 indent: 25,
                                 thickness: 1,
-                                color: const Color(0xffFF8D41),
+                                color: Color(0xffFF8D41),
                               ),
                             ),
-                            const Text(
+                            Text(
                               "  Request Vicinity  ",
                               style: TextStyle(
                                   fontSize: 16, fontFamily: "MontserratM"),
@@ -177,7 +240,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
                               child: Divider(
                                 endIndent: 25,
                                 thickness: 1,
-                                color: const Color(0xffFF8D41),
+                                color: Color(0xffFF8D41),
                               ),
                             ),
                           ],
@@ -195,6 +258,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
                                     child: Column(
                                       children: [
                                         TextField(
+                                          controller: _titleController,
                                           decoration: InputDecoration(
                                             labelText: "Add Title",
                                             labelStyle: const TextStyle(
@@ -218,6 +282,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
                                         ),
                                         const SizedBox(height: 16),
                                         TextField(
+                                          controller: _descController,
                                           decoration: InputDecoration(
                                             labelText: "Add Description",
                                             labelStyle: const TextStyle(
@@ -392,22 +457,22 @@ class _RequestVicinityState extends State<RequestVicinity> {
                             ],
                           ),
                           child: Column(
-                            children: const [
-                              Text(
+                            children: [
+                              const Text(
                                 "Pooling with ",
                                 style: TextStyle(
                                     fontFamily: "MontserratM", fontSize: 10),
                               ),
                               Text(
-                                "56",
-                                style: TextStyle(
+                                "$poolingUsers",
+                                style: const TextStyle(
                                     fontFamily: "MontserratSB",
                                     fontSize: 16,
                                     color: Color(0xffFF8D41)),
                               ),
                               Text(
-                                "users",
-                                style: TextStyle(
+                                (poolingUsers > 1) ? "users" : "user",
+                                style: const TextStyle(
                                     fontFamily: "MontserratM", fontSize: 10),
                               ),
                             ],
@@ -425,16 +490,16 @@ class _RequestVicinityState extends State<RequestVicinity> {
               child: Column(
                 children: [
                   const SizedBox(height: 16),
-                  Row(
+                  const Row(
                     children: [
                       Expanded(
                         child: Divider(
                           indent: 25,
                           thickness: 1,
-                          color: const Color(0xffFF8D41),
+                          color: Color(0xffFF8D41),
                         ),
                       ),
-                      const Text(
+                      Text(
                         "  Radius and wait time  ",
                         style: TextStyle(
                           fontFamily: "MontserratM",
@@ -445,7 +510,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
                         child: Divider(
                           endIndent: 25,
                           thickness: 1,
-                          color: const Color(0xffFF8D41),
+                          color: Color(0xffFF8D41),
                         ),
                       ),
                     ],
@@ -467,6 +532,15 @@ class _RequestVicinityState extends State<RequestVicinity> {
                             step: 100,
                             onChanged: (value) {
                               setState(() {
+                                _currentLocationCircle = Circle(
+                                  circleId:
+                                      const CircleId("currentLocationCircle"),
+                                  center: _currentPosition!,
+                                  radius: _radius,
+                                  strokeColor: Colors.blue,
+                                  strokeWidth: 2,
+                                  fillColor: Colors.blue.withOpacity(0.3),
+                                );
                                 _radius = value.toDouble();
                               });
                             },
@@ -532,15 +606,8 @@ class _RequestVicinityState extends State<RequestVicinity> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle Start Pooling
+                  createVicinity();
                 },
-                child: const Text(
-                  "Start Pooling",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: "MontserratSB",
-                      color: Colors.white),
-                ),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor: const Color(0xffFF8D41),
@@ -548,11 +615,63 @@ class _RequestVicinityState extends State<RequestVicinity> {
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
+                child: (isLoading)
+                    ? const CircularProgressIndicator()
+                    : const Text(
+                        "Start Pooling",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontFamily: "MontserratSB",
+                            color: Colors.white),
+                      ),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<List<String>> getNearestUsers(int id, double radius) async {
+    String endpoint = "https://api.picapool.com/v2/user/nearest";
+    String? at = authController.state.value.auth?.accessToken;
+    if (at == null) {
+      return [];
+    }
+    try {
+      final response = await http.post(Uri.parse(endpoint),
+          body: jsonEncode({'id': id, 'dist': radius}),
+          headers: {
+            'content-type': 'application/json',
+            'Authorization': 'Bearer $at'
+          });
+
+      print(response.statusCode);
+
+      if (response.statusCode < 300) {
+        var jsonResponse = jsonDecode(response.body);
+        List<String> usersList = [];
+
+        for (var user in jsonResponse) {
+          usersList.add(
+            '${user['latitude']} ${user['longitude']}',
+          );
+        }
+        setState(() {
+          poolingUsers = usersList.length;
+        });
+        return usersList;
+      } else if (response.statusCode == 401) {
+        debugPrint('Failed to load getNearestUsers - status code 401');
+        await authController.updateAccessToken();
+        return getNearestUsers(id, radius);
+      } else {
+        debugPrint('Failed to load getNearestUsers - status code not 200');
+        return [];
+      }
+    } catch (err) {
+      debugPrint('Failed to fetch getNearestUsers - api error');
+      return [];
+    }
   }
 }

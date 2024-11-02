@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,14 +10,14 @@ import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 
-class LocationScreen extends StatefulWidget {
+class LocationScreen extends ConsumerStatefulWidget {
   const LocationScreen({super.key});
 
   @override
   _LocationScreenState createState() => _LocationScreenState();
 }
 
-class _LocationScreenState extends State<LocationScreen>
+class _LocationScreenState extends ConsumerState<LocationScreen>
     with SingleTickerProviderStateMixin {
   GoogleMapController? _mapController;
   LatLng? _currentPosition;
@@ -54,7 +56,7 @@ class _LocationScreenState extends State<LocationScreen>
       curve: Curves.easeInOut,
     ));
 
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkKeyboardVisibility();
     });
   }
@@ -129,11 +131,19 @@ class _LocationScreenState extends State<LocationScreen>
       _locationEnabled = true;
     });
 
+    final LocationController locationController =
+        Get.find<LocationController>();
+    await locationController.getLocation();
+
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+        locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+    ));
 
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
+
       _selectedPosition = _currentPosition;
       _updateMarkersAndCircles();
     });
@@ -282,7 +292,7 @@ class _LocationScreenState extends State<LocationScreen>
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkKeyboardVisibility();
     });
 
@@ -347,31 +357,33 @@ class _LocationScreenState extends State<LocationScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.location_off, color: Colors.orange),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
+                    const Icon(Icons.location_off, color: Colors.orange),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FittedBox(
+                            child: Text(
                               "Device Location Not enable",
                               style: GoogleFonts.montserrat(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Text(
+                          ),
+                          FittedBox(
+                            child: Text(
                               "Enable for better Experience",
                               style: GoogleFonts.montserrat(
                                 color: Colors.grey,
-                                fontSize: 12,
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 4),
                     ElevatedButton(
                       onPressed: _fetchLocation,
                       style: ElevatedButton.styleFrom(

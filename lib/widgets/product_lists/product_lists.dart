@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:picapool/controllers/product_controller.dart';
 import 'package:picapool/models/product_grid_model.dart';
-import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/utils/routes.dart';
 import 'package:picapool/utils/svg_icon.dart';
 import 'package:picapool/screens/sell/select_category_page.dart';
@@ -48,6 +47,7 @@ class ProductListsPageState extends State<ProductListsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
       // bottomNavigationBar: NewBottomBarProduct(),
       floatingActionButton: FloatingActionButton(
           shape: RoundedRectangleBorder(

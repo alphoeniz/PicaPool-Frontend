@@ -8,6 +8,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:picapool/screens/public_profile.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:io';
+import 'package:get/get.dart';
+import 'package:picapool/functions/auth/auth_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,10 +19,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String selectedCountryCode = "91"; // Default country code
-  String selectedFlag = "🇮🇳"; // Default flag for India
+  final AuthController authController = Get.find<AuthController>();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneController = TextEditingController();
+
+  String selectedCountryCode = "91";
+  String selectedFlag = "🇮🇳";
 
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
@@ -33,115 +37,16 @@ class _LoginScreenState extends State<LoginScreen> {
     return null;
   }
 
-  Future<void> _sendOtp(String phoneNumber) async {
-    final String url = 'https://api.picapool.com/v2/otp?mobile=$phoneNumber';
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: '{}', // Sending an empty JSON object as the body
-      );
-
-      print('Status Code: ${response.statusCode}');
-      print('Response: ${response.body}');
-
-      if (response.statusCode == 201) {
-        Get.to(() => OtpScreen(phoneNumber: phoneNumber));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send OTP. Please try again.')),
-        );
-      }
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred. Please try again later.')),
-      );
-    }
+  void _sendOtp(String phoneNumber) async {
+    await authController.sendOtp(phoneNumber);
   }
 
-  Future<void> _signInWithGoogle() async {
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
-
-      if (account != null) {
-        final GoogleSignInAuthentication googleAuth = await account.authentication;
-        print('Google Token: ${googleAuth.idToken}');
-
-        final int statusCode = await _sendGoogleTokenToServer(googleAuth.idToken!);
-        print('Google Sign-In Response Status Code: $statusCode');
-
-        if (statusCode == 200) {
-          Get.to(() => PersonalDetails());
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to sign in with Google. Please try again.')),
-          );
-        }
-      }
-    } catch (e) {
-      print('Google Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in with Google. Please try again.')),
-      );
-    }
+  void _signInWithGoogle() async {
+    await authController.loginWithGoogle();
   }
 
-  Future<void> _signInWithApple() async {
-    try {
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      print('Apple Identity Token: ${appleCredential.identityToken}');
-
-      // Send the token to the server and get the status code
-      final int statusCode = await _sendAppleTokenToServer(appleCredential.identityToken!);
-
-      print('Apple Sign-In Response Status Code: $statusCode');
-
-      if (statusCode == 200) {
-        Get.to(() => PersonalDetails());
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to sign in with Apple. Please try again.')),
-        );
-      }
-    } catch (e) {
-      print('Apple Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in with Apple. Please try again.')),
-      );
-    }
-  }
-
-  Future<int> _sendGoogleTokenToServer(String googleToken) async {
-    final String url = 'https://api.picapool.com/v2/auth/login/user';
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: '{"authInfo": {"googleToken": "$googleToken"}}',
-    );
-
-    return response.statusCode;
-  }
-
-  Future<int> _sendAppleTokenToServer(String appleToken) async {
-    final String url = 'https://api.picapool.com/v2/auth/login/user';
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: '{"authInfo": {"appleToken": "$appleToken"}}',
-    );
-
-    return response.statusCode;
+  void _signInWithApple() async {
+    await authController.loginWithApple();
   }
 
   @override
@@ -271,23 +176,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  "We’ll text you a code to verify you’re really you.",
-                  style: TextStyle(
-                      fontFamily: "MontserratR",
-                      color: Color(0xff757171),
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal),
-                ),
-                const Text(
-                  "Message and data rates may apply.",
-                  style: TextStyle(
-                      fontFamily: "MontserratR",
-                      color: Color(0xff757171),
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal),
-                ),
-                const SizedBox(height: 40),
+                Obx(() => authController.state.value.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : const SizedBox.shrink()),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
@@ -295,7 +187,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       _sendOtp(fullPhoneNumber);
                     }
                   },
-                  child: Text(
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xffFF8D41)),
+                    minimumSize: MaterialStateProperty.all(
+                        const Size(double.infinity, 50)),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    )),
+                  ),
+                  child: const Text(
                     "Send OTP",
                     style: TextStyle(
                       fontFamily: "MontserratSB",
