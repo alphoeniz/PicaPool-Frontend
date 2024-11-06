@@ -12,6 +12,7 @@ import 'package:picapool/functions/location/location_provider.dart';
 
 import 'package:picapool/functions/storage/storage_controller.dart';
 import 'package:picapool/functions/vicinity/vicinity_api.dart';
+import 'package:picapool/functions/vicinity/vicinity_controller.dart';
 import 'package:picapool/screens/login_screen.dart';
 import 'package:picapool/utils/bindings.dart';
 
@@ -26,6 +27,7 @@ void main() async {
   Get.put(AuthController());
   Get.put(LocationController());
   Get.put(VicinityApiController());
+  Get.put(VicinityController());
 
   runApp(const MyApp());
 }
@@ -36,7 +38,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController authController = Get.find<AuthController>();
-    authController.checkForExistingUser();
 
     return GetMaterialApp(
       enableLog: true,
@@ -54,14 +55,14 @@ class MyApp extends StatelessWidget {
   }
 
   Widget _handleAuthState(AuthController authController) {
-    if (authController.state.value.isLoading) {
+    if (authController.isLoading.value) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
       );
-    } else if (authController.state.value.auth != null &&
-        authController.state.value.user != null) {
+    } else if (authController.auth.value != null &&
+        authController.user.value != null) {
       return const NewBottomBar();
     } else {
       return const LoginScreen();

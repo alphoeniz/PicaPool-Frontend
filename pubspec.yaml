@@ -74,6 +74,7 @@ dependencies:
   logger: ^2.4.0
   get_storage:
   jwt_decode: 
+  http_parser: ^4.0.2
 
 dev_dependencies:
   flutter_test:

@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:picapool/functions/auth/auth_controller.dart';
 import 'package:picapool/models/user_model.dart';
 
-class ProfileScreen extends StatelessWidget {
-  ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
+
   final TextEditingController _usernameController = TextEditingController();
+
   final TextEditingController _phoneController = TextEditingController();
 
   final AuthController authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
-    var user = authController.state.value.user;
+    var user = authController.user.value;
     if (user == null) {
       return const Scaffold(
         body: Center(
@@ -86,62 +92,67 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Ansh",
-                        style: TextStyle(
-                          fontFamily: "MontserratSB",
-                          fontSize: 24,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        "@${user.username ?? "nousername"}",
-                        style: const TextStyle(
-                          fontFamily: "MontserratR",
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        "84578 95123",
-                        style: TextStyle(
-                          fontFamily: "MontserratR",
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              _showEditProfileModal(
-                                  context, user); // Open bottom modal
-                            },
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  "assets/icons/Frame 153.png",
-                                  height: 24,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  "Edit Profile",
-                                  style: TextStyle(
-                                    fontFamily: "MontserratM",
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FittedBox(
+                          child: Text(
+                            user.name ?? "",
+                            style: const TextStyle(
+                              fontFamily: "MontserratSB",
+                              fontSize: 24,
+                              color: Colors.white,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        Text(
+                          "@${user.username ?? "nousername"}",
+                          style: const TextStyle(
+                            fontFamily: "MontserratR",
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          user.auth?.mobile ?? "",
+                          style: const TextStyle(
+                            fontFamily: "MontserratR",
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _showEditProfileModal(
+                                    context, user); // Open bottom modal
+                              },
+                              child: Row(
+                                children: [
+                                  Image.asset(
+                                    "assets/icons/Frame 153.png",
+                                    height: 24,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    "Edit Profile",
+                                    style: TextStyle(
+                                      fontFamily: "MontserratM",
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   )
                 ],
               ),
@@ -341,6 +352,9 @@ class ProfileScreen extends StatelessWidget {
 
   void _showEditProfileModal(BuildContext context, User user) {
     debugPrint(user.toJson().toString());
+    _usernameController.text = user.username ?? "";
+    _nameController.text = user.name ?? "";
+
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -416,14 +430,14 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          _buildTextField(Icons.person, "Name",
-                              _nameController..text = user.name ?? ""),
+                          _buildTextField(
+                              Icons.person, "Name", _nameController),
                           const Divider(thickness: 1.5),
-                          _buildTextField(Icons.info, "Username",
-                              _usernameController..text = user.username ?? ""),
+                          _buildTextField(
+                              Icons.info, "Username", _usernameController),
                           const Divider(thickness: 1.5),
-                          _buildTextField(Icons.phone, "Phone",
-                              _phoneController..text = user.auth?.mobile ?? ""),
+                          _buildTextField(
+                              Icons.phone, "Phone", _phoneController),
                           // const Divider(thickness: 1.5),
                           // _buildTextField(
                           //     Icons.email, "Email", "noemail@gmail.com"),
@@ -447,6 +461,7 @@ class ProfileScreen extends StatelessWidget {
                             _phoneController.text != user.auth?.mobile) {
                           updatedValues["phone"] = _phoneController.text;
                         }
+
                         if (updatedValues.isNotEmpty) {
                           showDialog(
                             context: context,
@@ -461,6 +476,7 @@ class ProfileScreen extends StatelessWidget {
                           if (context.mounted) {
                             Navigator.pop(context); // Close the loading dialog
                             Navigator.pop(context); // Close the modal
+                            setState(() {});
                           }
                         }
                       },
@@ -641,98 +657,102 @@ class ProfileScreen extends StatelessWidget {
   );
 }
 
-void _showLogoutModal(BuildContext context) {
-  showModalBottomSheet(
-    backgroundColor: Colors.white,
-    context: context,
-    isScrollControlled: true, // This makes modal full screen
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (context) {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 10),
-            Container(
-              width: 50,
-              height: 5,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "Log Out",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                fontFamily: "MontserratSB",
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Do you really want to Log Out of your account?",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-                fontFamily: "MontserratR",
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            // Log Out Button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Add your logout functionality here
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xffFF8D41), // Orange background color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Rounded corners
+  void _showLogoutModal(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: Colors.white,
+      context: context,
+      isScrollControlled: true, // This makes modal full screen
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                minimumSize: Size(double.infinity, 50), // Full width button
               ),
-              child: Text(
+              const SizedBox(height: 20),
+              const Text(
                 "Log Out",
                 style: TextStyle(
-                  color: Colors.white, // White text color
-                  fontSize: 18,
-                  fontFamily: "MontserratR",
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "MontserratSB",
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            // Go Back Button
-            OutlinedButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the modal
-              },
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.grey), // Grey outline
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Rounded corners
-                ),
-                minimumSize: Size(double.infinity, 50), // Full width button
-              ),
-              child: Text(
-                "Go Back",
+              const SizedBox(height: 8),
+              const Text(
+                "Do you really want to Log Out of your account?",
                 style: TextStyle(
-                  color: Colors.grey, // Grey text color
                   fontSize: 16,
+                  color: Colors.grey,
                   fontFamily: "MontserratR",
                 ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-
+              const SizedBox(height: 20),
+              // Log Out Button
+              ElevatedButton(
+                onPressed: () async {
+                  await authController.logout();
+                  if (context.mounted) {
+                    Navigator.pop(context); // Close the modal
+                  } // Add your logout functionality here
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      const Color(0xffFF8D41), // Orange background color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                  ),
+                  minimumSize:
+                      const Size(double.infinity, 50), // Full width button
+                ),
+                child: const Text(
+                  "Log Out",
+                  style: TextStyle(
+                    color: Colors.white, // White text color
+                    fontSize: 18,
+                    fontFamily: "MontserratR",
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // Go Back Button
+              OutlinedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.grey), // Grey outline
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                  ),
+                  minimumSize:
+                      const Size(double.infinity, 50), // Full width button
+                ),
+                child: const Text(
+                  "Go Back",
+                  style: TextStyle(
+                    color: Colors.grey, // Grey text color
+                    fontSize: 16,
+                    fontFamily: "MontserratR",
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

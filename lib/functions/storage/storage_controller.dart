@@ -5,7 +5,6 @@ import 'package:picapool/models/auth_model.dart';
 import 'package:picapool/models/user_model.dart';
 
 class StorageController extends GetxController {
-  // Reactive variables for Auth and User.
   final Rx<Auth?> _auth = Rx<Auth?>(null);
   final Rx<User?> _user = Rx<User?>(null);
 
@@ -22,7 +21,6 @@ class StorageController extends GetxController {
     loadUser();
   }
 
-  /// Saves the authentication information (Auth) to SharedPreferences.
   Future<void> saveAuth(Auth auth) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String authData = jsonEncode(auth.toJson());
@@ -31,7 +29,6 @@ class StorageController extends GetxController {
     _user.value = auth.user;
   }
 
-  /// Loads the authentication information (Auth) from SharedPreferences.
   Future<void> loadAuth() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? authData = prefs.getString('auth');
@@ -43,7 +40,6 @@ class StorageController extends GetxController {
     }
   }
 
-  /// Clears the authentication information from SharedPreferences.
   Future<void> clearAuth() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth');
@@ -51,7 +47,6 @@ class StorageController extends GetxController {
     _user.value = null;
   }
 
-  /// Saves the user data to SharedPreferences.
   Future<void> saveUser(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userData = jsonEncode(user.toJson());
@@ -59,7 +54,6 @@ class StorageController extends GetxController {
     _user.value = user;
   }
 
-  /// Loads the user data from SharedPreferences.
   Future<void> loadUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userData = prefs.getString('user');
@@ -70,7 +64,6 @@ class StorageController extends GetxController {
     }
   }
 
-  /// Clears the user data from SharedPreferences.
   Future<void> clearUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('user');

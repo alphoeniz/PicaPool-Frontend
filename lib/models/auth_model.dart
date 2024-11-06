@@ -38,8 +38,9 @@ class Auth {
     this.accessToken,
   });
 
-  factory Auth.fromJson(Map<String, dynamic> json) {
-    debugPrint("Auth.fromJson: $json");
+  factory Auth.fromJson(Map<String, dynamic> jsonData) {
+    debugPrint("Auth.fromJson: $jsonData");
+    var json = jsonData['data'];
     return Auth(
       // id: json['id'],
       googleSub: json['googleSub'],
@@ -66,6 +67,7 @@ class Auth {
 
   static User _getUserFromAccessToken(String accessToken) {
     var jwt = Token.decode(accessToken);
+    debugPrint("accessToken: $accessToken");
     var user = User(
       id: jwt['tenant']['id'],
       createdAt: DateTime.fromMillisecondsSinceEpoch(jwt['iat']),
