@@ -9,6 +9,10 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:picapool/functions/auth/auth_controller.dart';
 import 'package:http/http.dart' as http;
+import 'package:picapool/functions/vicinity/vicinity_api.dart';
+import 'package:picapool/functions/vicinity/vicinity_controller.dart';
+import 'package:picapool/models/offer_model.dart';
+import 'package:picapool/models/vicinity_offer_model.dart';
 
 class RequestVicinity extends ConsumerStatefulWidget {
   const RequestVicinity({super.key});
@@ -29,6 +33,7 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
   Marker? _pinMarker;
   Circle? _currentLocationCircle;
   bool _isMapInitialized = false; // New flag to check if the map is initialized
+  List<dynamic> _nearestUsers = [];
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
@@ -37,13 +42,13 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
   int poolingUsers = 0;
 
   final AuthController authController = Get.find<AuthController>();
+  final VicinityController vicinityController = Get.find<VicinityController>();
 
   @override
   void initState() {
     super.initState();
-    _fetchLocation();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      getNearestUsers(authController.state.value.user!.id, 500);
+    _fetchLocation().whenComplete(() async {
+      getNearestUsers(authController.user.value!.id, _radius);
     });
   }
 
@@ -77,6 +82,7 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
       _updateMarkersAndCircles();
+      getNearestUsers(authController.user.value!.id, _radius);
 
       if (_controller != null && !_isMapInitialized) {
         _controller!.animateCamera(
@@ -87,8 +93,7 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
             ),
           ),
         );
-        _isMapInitialized =
-            true; // Map is now initialized with the current location
+        _isMapInitialized = true;
       }
     });
   }
@@ -145,7 +150,6 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
   }
 
   void createVicinity() async {
-    // Call the createVicinity function from the vicinityApiProvider
     setState(() {
       isLoading = true;
     });
@@ -158,32 +162,47 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
       return;
     }
 
-    // final vicinityApi = ;
+    var auth = authController.auth.value;
 
-    final offer = {
-      "name": _titleController.text,
-      "images": _imageFiles!.map((file) => file.path).toList(),
-      "desc": _descController.text,
-      "expiry": DateTime.now()
-          .add(Duration(minutes: _waitTime.toInt()))
-          .toIso8601String(),
-      "isOnline": false,
-    };
-
-    final userId =
-        authController.state.value.user?.id; // Replace with actual user ID
-    if (userId == null) {
+    final userId = auth?.user?.id;
+    if (userId == null || auth == null) {
       setState(() {
         isLoading = false;
       });
       debugPrint("User ID is null");
       return;
     }
-    // await vicinityApi.createVicinity(
-    //   offer: offer,
-    //   destination: _radius.toInt(),
-    //   userId: userId,
-    // );
+
+    // final vicinityApi = ;
+    var url = await vicinityController.uploadImage(
+      _imageFiles!.first,
+      auth.user!.name!,
+      _titleController.text,
+    );
+
+    if (url == null) {
+      debugPrint("Error uploading image");
+      Get.snackbar("Error", "Error uploading image",
+          snackPosition: SnackPosition.TOP);
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    final offer = VicinityOffer(
+      name: _titleController.text,
+      images: [url],
+      desc: _descController.text,
+      expiryAt: DateTime.now().add(Duration(minutes: _waitTime.toInt())),
+      creatorID: auth.user!.id,
+      category: 1,
+      brand: 1,
+    );
+
+    await vicinityController.createVicinity(
+      offer: offer,
+    );
 
     setState(() {
       isLoading = false;
@@ -632,46 +651,65 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
     );
   }
 
-  Future<List<String>> getNearestUsers(int id, double radius) async {
+  Future<void> getNearestUsers(int id, double radius) async {
     String endpoint = "https://api.picapool.com/v2/user/nearest";
-    String? at = authController.state.value.auth?.accessToken;
+    String? at = authController.auth.value?.accessToken;
     if (at == null) {
-      return [];
+      return;
     }
+
+    debugPrint(
+        'Fetching nearest users with coordinates : ${_currentPosition?.latitude}, ${_currentPosition?.longitude}');
     try {
       final response = await http.post(Uri.parse(endpoint),
-          body: jsonEncode({'id': id, 'dist': radius}),
+          body: jsonEncode({
+            'locationData': {
+              'lat': _currentPosition?.latitude ?? 0,
+              'long': _currentPosition?.longitude ?? 0,
+              'dist': radius,
+              'count': 10
+            }
+          }),
           headers: {
             'content-type': 'application/json',
             'Authorization': 'Bearer $at'
           });
 
-      print(response.statusCode);
+      print(response.body);
 
       if (response.statusCode < 300) {
         var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['success'] == false) {
+          return;
+        }
+
+        var users = jsonResponse['data'] as List<dynamic>? ?? [];
         List<String> usersList = [];
 
-        for (var user in jsonResponse) {
+        for (var user in users) {
           usersList.add(
             '${user['latitude']} ${user['longitude']}',
           );
         }
+
+        _nearestUsers = usersList;
+
         setState(() {
-          poolingUsers = usersList.length;
+          poolingUsers = users.length;
         });
-        return usersList;
       } else if (response.statusCode == 401) {
         debugPrint('Failed to load getNearestUsers - status code 401');
-        await authController.updateAccessToken();
-        return getNearestUsers(id, radius);
+        var success = await authController.updateAccessToken();
+        if (success) {
+          await getNearestUsers(id, radius);
+        }
       } else {
         debugPrint('Failed to load getNearestUsers - status code not 200');
-        return [];
+        return;
       }
     } catch (err) {
-      debugPrint('Failed to fetch getNearestUsers - api error');
-      return [];
+      debugPrint('Failed to fetch getNearestUsers - $err');
+      return;
     }
   }
 }

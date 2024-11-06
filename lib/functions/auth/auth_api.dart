@@ -11,18 +11,9 @@ import 'package:picapool/models/auth_model.dart';
 import 'package:picapool/models/user_model.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-abstract class IAuthApi {
-  FutureEither<Auth> signInWithGoogle();
-  FutureEither<Auth> signInWithApple();
-  FutureEither<User> createUser(User user, String accessToken);
-  FutureVoid updateUser(Map<String, dynamic> updateValues, String accessToken,
-      {required int id});
 
-  FutureVoid getUser(int id, String accessToken);
-}
-
-class AuthApi implements IAuthApi {
-  @override
+class AuthApi {
+  
   FutureEither<Auth> signInWithGoogle() async {
     final GoogleSignIn googleSignIn = GoogleSignIn(
       scopes: ['profile', 'email'],
@@ -68,7 +59,7 @@ class AuthApi implements IAuthApi {
     }
   }
 
-  @override
+  
   FutureEither<Auth> signInWithApple() async {
     try {
       final AuthorizationCredentialAppleID appleCredential =
@@ -108,36 +99,6 @@ class AuthApi implements IAuthApi {
     }
   }
 
-  // Future<void> sendOtp(String phoneNumber) async {
-  //   final String url = 'https://api.picapool.com/v2/otp?mobile=$phoneNumber';
-
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: '{}', // Sending an empty JSON object as the body
-  //     );
-
-  //     debugPrint('Status Code: ${response.statusCode}');
-  //     debugPrint('Response: ${response.body}');
-
-  //     if (response.statusCode == 201) {
-  //       Get.to(() => OtpScreen(phoneNumber: phoneNumber));
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //             content: Text('Failed to send OTP. Please try again.')),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     debugPrint('Error: $e');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //           content: Text('An error occurred. Please try again later.')),
-  //     );
-  //   }
-  // }
-
   Future<http.Response> _sendGoogleTokenToServer(String googleToken) async {
     const String url = 'https://api.picapool.com/v2/auth/login/User';
 
@@ -166,7 +127,42 @@ class AuthApi implements IAuthApi {
     return response;
   }
 
-  @override
+  FutureEither<Auth> loginWithOtp(String mobile, String otp) async {
+    const String url = 'https://api.picapool.com/v2/auth/login/User';
+
+    var body = {
+      'authInfo': {
+        'msgOTP': {
+          'mobile': mobile,
+          'otp': otp,
+        }
+      }
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    log('OTP Sign-In Response: ${response.body}');
+
+    final int statusCode = response.statusCode;
+
+    debugPrint('OTP Sign-In Response Status Code: $statusCode');
+
+    if (statusCode >= 200 && statusCode < 300) {
+      var auth = jsonDecode(response.body);
+      return right(Auth.fromJson(auth));
+    } else {
+      return left(
+        Failure(
+            message: "Not able to sign in with otp : Status Code $statusCode",
+            stackTrace: StackTrace.current),
+      );
+    }
+  }
+
   FutureEither<User> createUser(User user, String accessToken) async {
     try {
       const String url = "https://api.picapool.com/v2/user";
@@ -175,11 +171,12 @@ class AuthApi implements IAuthApi {
         "bio": user.bio,
         "pic": user.pic,
         "tagList": [],
-        "accessToken": accessToken,
       };
       http.Response response = await http.post(
         Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode(body),
       );
       int statusCode = response.statusCode;
@@ -187,6 +184,13 @@ class AuthApi implements IAuthApi {
         debugPrint('User Created: ${response.body}');
         var user = jsonDecode(response.body);
         return right(user);
+      } else if (JwtDecoder.isExpired(accessToken)) {
+        return left(
+          Failure(
+            message: "Access token expired",
+            stackTrace: StackTrace.current,
+          ),
+        );
       } else {
         return left(
           Failure(
@@ -208,20 +212,54 @@ class AuthApi implements IAuthApi {
     }
   }
 
-  @override
+  // FutureEither<Auth> verifyOtp(String phoneNumber, String otp) async {
+  //   String url =
+  //       'https://api.picapool.com/v2/otp/verify?otp=$otp&mobile=${phoneNumber}';
+  //   try {
+  //     final response = await http.get(
+  //       Uri.parse(url),
+  //       headers: {'Content-Type': 'application/json'},
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final responseBody = response.body;
+  //       if (responseBody.contains('"type":"success"')) {}
+  //       // else {
+  //       //   setState(() {
+  //       //     _isOtpIncorrect = true;
+  //       //   });
+
+  //       //   ScaffoldMessenger.of(context).showSnackBar(
+  //       //     const SnackBar(content: Text('Incorrect OTP. Please try again.')),
+  //       //   );
+  //       // }
+  //     } else {
+  //       // ScaffoldMessenger.of(context).showSnackBar(
+  //       //   const SnackBar(
+  //       //       content: Text('Failed to verify OTP. Please try again.')),
+  //       // );
+  //     }
+  //   } catch (e) {
+  //     print('Error: $e');
+  //     // ScaffoldMessenger.of(context).showSnackBar(
+  //     //   const SnackBar(
+  //     //       content: Text('An error occurred. Please try again later.')),
+  //     // );
+  //   }
+  // }
+
   FutureEither<int> updateUser(
-      Map<String, dynamic> updateValues, String accessToken,
-      {required int id}) async {
+      Map<String, dynamic> updateValues, String accessToken) async {
     try {
       const String url = "https://api.picapool.com/v2/user/update";
-
-      getUser(id, accessToken);
 
       debugPrint("Updated Values: $updateValues");
 
       debugPrint("Access token : $accessToken");
       var body = {
-        "user": {...updateValues}
+        "user": {
+          ...updateValues,
+        }
       };
 
       debugPrint(body.toString());
@@ -237,12 +275,13 @@ class AuthApi implements IAuthApi {
       int statusCode = response.statusCode;
       if (statusCode >= 200 && statusCode < 300) {
         debugPrint('User Updated: ${response.body}');
-        getUser(id, accessToken);
-        int success = jsonDecode(response.body);
+        var json = jsonDecode(response.body);
+        int success = json['data'];
         debugPrint("$success");
         return right(success);
       } else {
-        debugPrint('Update User Error: $statusCode');
+        debugPrint(
+            'Update User Error: $statusCode with response ${response.body}');
         return left(
           Failure(
             message: "Not able to create the user : status code $statusCode",
@@ -263,11 +302,10 @@ class AuthApi implements IAuthApi {
     }
   }
 
-  @override
-  FutureVoid getUser(int id, String accessToken) async {
+  FutureEither<User> getUser({required int userId, required String accessToken}) async {
     try {
       var response = await http.get(
-        Uri.parse('https://api.picapool.com/v2/user/$id'),
+        Uri.parse('https://api.picapool.com/v2/user/$userId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken'
@@ -275,22 +313,39 @@ class AuthApi implements IAuthApi {
       );
       int statusCode = response.statusCode;
       if (statusCode >= 200 && statusCode <= 300) {
-        var user = jsonDecode(response.body);
-        debugPrint('User: $user');
+        var json = jsonDecode(response.body);
+        debugPrint("getUser Response: $json");
+        if (json['success']) {
+          var user = User.fromJson(json['data']);
+          return right(user);
+        } else {
+          return left(
+            Failure(
+              message: json['message'],
+              stackTrace: StackTrace.current,
+            ),
+          );
+        }
       } else {
         debugPrint(
           'Not able to get the user : status code $statusCode',
         );
 
-        // left(
-        //   Failure(
-        //     message: "Not able to get the user : status code $response",
-        //     stackTrace: StackTrace.current,
-        //   ),
-        // );
+        return left(
+          Failure(
+            message: "Not able to get the user : status code $response",
+            stackTrace: StackTrace.current,
+          ),
+        );
       }
     } catch (e) {
       debugPrint('Get User Error: $e');
+      return left(
+        Failure(
+          message: "Not able to get the user : status code $e",
+          stackTrace: StackTrace.current,
+        ),
+      );
     }
   }
 
@@ -328,4 +383,38 @@ class AuthApi implements IAuthApi {
   //     );
 
   // }
+
+  Future<String?> updateAccessToken({
+    required String accessToken,
+    required String refreshToken,
+    required int userId,
+  }) async {
+    debugPrint('REQUESTED FOR UPDATE ACCESS TOKEN');
+    debugPrint('Refresh token: $refreshToken');
+    try {
+      final response = await http.post(
+        Uri.parse("https://api.picapool.com/v2/auth/accessToken"),
+        body: jsonEncode({
+          "refreshToken": refreshToken,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+      debugPrint('UPDATE ACCESS TOKEN RESPONSE CODE : ${response.statusCode}');
+
+      if (response.statusCode < 300) {
+        String newAccessToken = response.body;
+        debugPrint('New Access Token: $newAccessToken');
+
+        return newAccessToken;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error updating access token: $e');
+      return null;
+    }
+  }
 }

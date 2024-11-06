@@ -171,9 +171,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                Obx(() => authController.state.value.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : const SizedBox.shrink()),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
@@ -185,10 +182,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   style: ButtonStyle(
                     backgroundColor:
-                        MaterialStateProperty.all(const Color(0xffFF8D41)),
-                    minimumSize: MaterialStateProperty.all(
+                        WidgetStateProperty.all(const Color(0xffFF8D41)),
+                    minimumSize: WidgetStateProperty.all(
                         const Size(double.infinity, 50)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     )),
                   ),

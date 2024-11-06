@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:picapool/functions/auth/auth_controller.dart';
 import 'package:picapool/models/user_model.dart';
 
-class ProfileScreen extends StatelessWidget {
-  ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
+
   final TextEditingController _usernameController = TextEditingController();
+
   final TextEditingController _phoneController = TextEditingController();
 
   final AuthController authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
-    var user = authController.state.value.user;
+    var user = authController.user.value;
     if (user == null) {
       return const Scaffold(
         body: Center(
@@ -92,62 +98,67 @@ class ProfileScreen extends StatelessWidget {
                           ),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.name ?? "",
-                        style: const TextStyle(
-                          fontFamily: "MontserratSB",
-                          fontSize: 24,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        "@${user.username ?? "nousername"}",
-                        style: const TextStyle(
-                          fontFamily: "MontserratR",
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        user.auth?.mobile ?? "",
-                        style: const TextStyle(
-                          fontFamily: "MontserratR",
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              _showEditProfileModal(
-                                  context, user); // Open bottom modal
-                            },
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  "assets/icons/Frame 153.png",
-                                  height: 24,
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  "Edit Profile",
-                                  style: TextStyle(
-                                    fontFamily: "MontserratM",
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FittedBox(
+                          child: Text(
+                            user.name ?? "",
+                            style: const TextStyle(
+                              fontFamily: "MontserratSB",
+                              fontSize: 24,
+                              color: Colors.white,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        Text(
+                          "@${user.username ?? "nousername"}",
+                          style: const TextStyle(
+                            fontFamily: "MontserratR",
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          user.auth?.mobile ?? "",
+                          style: const TextStyle(
+                            fontFamily: "MontserratR",
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _showEditProfileModal(
+                                    context, user); // Open bottom modal
+                              },
+                              child: Row(
+                                children: [
+                                  Image.asset(
+                                    "assets/icons/Frame 153.png",
+                                    height: 24,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    "Edit Profile",
+                                    style: TextStyle(
+                                      fontFamily: "MontserratM",
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   )
                 ],
               ),
@@ -354,6 +365,9 @@ class ProfileScreen extends StatelessWidget {
 
   void _showEditProfileModal(BuildContext context, User user) {
     debugPrint(user.toJson().toString());
+    _usernameController.text = user.username ?? "";
+    _nameController.text = user.name ?? "";
+
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -437,14 +451,14 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          _buildTextField(Icons.person, "Name",
-                              _nameController..text = user.name ?? ""),
+                          _buildTextField(
+                              Icons.person, "Name", _nameController),
                           const Divider(thickness: 1.5),
-                          _buildTextField(Icons.info, "Username",
-                              _usernameController..text = user.username ?? ""),
+                          _buildTextField(
+                              Icons.info, "Username", _usernameController),
                           const Divider(thickness: 1.5),
-                          _buildTextField(Icons.phone, "Phone",
-                              _phoneController..text = user.auth?.mobile ?? ""),
+                          _buildTextField(
+                              Icons.phone, "Phone", _phoneController),
                           // const Divider(thickness: 1.5),
                           // _buildTextField(
                           //     Icons.email, "Email", "noemail@gmail.com"),
@@ -468,6 +482,7 @@ class ProfileScreen extends StatelessWidget {
                             _phoneController.text != user.auth?.mobile) {
                           updatedValues["phone"] = _phoneController.text;
                         }
+
                         if (updatedValues.isNotEmpty) {
                           showDialog(
                             context: context,
@@ -482,6 +497,7 @@ class ProfileScreen extends StatelessWidget {
                           if (context.mounted) {
                             Navigator.pop(context); // Close the loading dialog
                             Navigator.pop(context); // Close the modal
+                            setState(() {});
                           }
                         }
                       },
@@ -717,8 +733,11 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 20),
               // Log Out Button
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Add your logout functionality here
+                onPressed: () async {
+                  await authController.logout();
+                  if (context.mounted) {
+                    Navigator.pop(context); // Close the modal
+                  } // Add your logout functionality here
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
@@ -741,8 +760,8 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 10),
               // Go Back Button
               OutlinedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close the modal
+                onPressed: () async {
+                  Navigator.pop(context);
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.grey), // Grey outline

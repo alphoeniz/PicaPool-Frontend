@@ -64,8 +64,12 @@ class User {
       bio: json['bio'],
       location: json['location'],
       fcmToken: json['fcmToken'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
       auth: json['auth'] != null ? Auth.fromJson(json['auth']) : null,
       authId: json['authId'],
       feedback: (json['feedback'] as List?)
@@ -97,8 +101,8 @@ class User {
       'bio': bio,
       'location': location,
       'fcmToken': fcmToken,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'updatedAt': updatedAt.toUtc().toIso8601String(),
       'auth': auth?.toJson(),
       'authId': authId,
       'feedback': feedback?.map((e) => e.toJson()).toList(),
@@ -147,5 +151,51 @@ class User {
             .toList()
         : liveOffers;
     updatedAt = DateTime.now();
+  }
+
+  User copyWith({
+    int? id,
+    String? name,
+    String? pic,
+    int? age,
+    String? gender,
+    String? username,
+    String? bio,
+    String? location,
+    String? fcmToken,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Auth? auth,
+    int? authId,
+    List<Feedback>? feedback,
+    List<Chat>? chats,
+    List<Message>? messages,
+    List<Offer>? offers,
+    List<Reaction>? reactions,
+    List<Tag>? tags,
+    List<LiveOffer>? liveOffers,
+  }) {
+    return User(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      pic: pic ?? this.pic,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
+      username: username ?? this.username,
+      bio: bio ?? this.bio,
+      location: location ?? this.location,
+      fcmToken: fcmToken ?? this.fcmToken,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      auth: auth ?? this.auth,
+      authId: authId ?? this.authId,
+      feedback: feedback ?? this.feedback,
+      chats: chats ?? this.chats,
+      messages: messages ?? this.messages,
+      offers: offers ?? this.offers,
+      reactions: reactions ?? this.reactions,
+      tags: tags ?? this.tags,
+      liveOffers: liveOffers ?? this.liveOffers,
+    );
   }
 }

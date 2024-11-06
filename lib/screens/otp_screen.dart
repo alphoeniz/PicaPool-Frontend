@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/route_manager.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart'; // SMS inbox package
+import 'package:picapool/functions/auth/auth_controller.dart';
 import 'dart:async';
 import 'dart:convert';
-
-import 'package:picapool/screens/personal_details.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -29,6 +28,8 @@ class _OtpScreenState extends State<OtpScreen> {
   Timer? _timer;
   String? otpCode;
   final SmsQuery _smsQuery = SmsQuery();
+
+  final authController = Get.find<AuthController>();
 
   @override
   void initState() {
@@ -67,14 +68,21 @@ class _OtpScreenState extends State<OtpScreen> {
       count: 10,
     );
 
-    for (var message in messages) {
-      print("SMS Received: ${message.body}");
-      if (message.address == "CP-PICAPL" && // Check if the sender is CP-PICAPL
+    var dateTime = DateTime.now();
+
+    for (SmsMessage message in messages) {
+      if (_isOtpComplete) {
+        break; // Stop listening if the user has already entered the code
+      }
+      debugPrint("SMS Received: ${message.body}");
+      if (message.date != null &&
+          message.date!.isAfter(dateTime) &&
+          message.address == "CP-PICAPL" && // Check if the sender is CP-PICAPL
           message.body != null &&
           message.body!.contains("Your OTP for phone number verification is") &&
           message.body!.contains(" -PicaPool")) {
         otpCode = _extractOtp(message.body!);
-        print("Extracted OTP: $otpCode");
+        debugPrint("Extracted OTP: $otpCode");
         if (otpCode != null && otpCode!.length == 4) {
           for (int i = 0; i < otpCode!.length; i++) {
             _controllers[i].text = otpCode![i];
@@ -102,8 +110,8 @@ class _OtpScreenState extends State<OtpScreen> {
 
   Future<void> _verifyOtp() async {
     String otp = _controllers.map((controller) => controller.text).join('');
-    String url = 'https://api.picapool.com/v2/otp/verify?otp=$otp&mobile=${widget.phoneNumber}';
-
+    String url =
+        'https://api.picapool.com/v2/otp/verify?otp=$otp&mobile=${widget.phoneNumber}';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -112,28 +120,36 @@ class _OtpScreenState extends State<OtpScreen> {
 
       if (response.statusCode == 200) {
         final responseBody = response.body;
-
-        if (responseBody.contains('"type":"success"')) {
-          Get.to(() => PersonalDetails());
+        debugPrint('Response: $responseBody');
+        if (responseBody.contains('"type":"success"') ||
+            responseBody.contains('already verified')) {
+          await authController.loginWithOtp(widget.phoneNumber, otp);
         } else {
           setState(() {
             _isOtpIncorrect = true;
           });
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Incorrect OTP. Please try again.')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Incorrect OTP. Please try again.')),
+            );
+          }
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to verify OTP. Please try again.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Failed to verify OTP. Please try again.')),
+          );
+        }
       }
     } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred. Please try again later.')),
-      );
+      debugPrint('Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('An error occurred. Please try again later.')),
+        );
+      }
     }
   }
 
@@ -165,19 +181,21 @@ class _OtpScreenState extends State<OtpScreen> {
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to resend OTP. Please try again.')),
+          const SnackBar(
+              content: Text('Failed to resend OTP. Please try again.')),
         );
       }
     } catch (e) {
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred. Please try again later.')),
+        const SnackBar(
+            content: Text('An error occurred. Please try again later.')),
       );
     }
   }
 
   void _startResendCountdown() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_resendCountdown > 0) {
           _resendCountdown--;
@@ -214,8 +232,8 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '${widget.phoneNumber}',
-                  style: TextStyle(
+                  widget.phoneNumber,
+                  style: const TextStyle(
                     fontFamily: "MontserratR",
                     fontSize: 12,
                     color: Color(0xff7C7C7C),
@@ -229,7 +247,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     (index) => Container(
                       width: 50,
                       height: 50,
-                      margin: EdgeInsets.symmetric(horizontal: 5),
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
                       child: TextField(
                         controller: _controllers[index],
                         focusNode: _focusNodes[index],
@@ -242,7 +260,7 @@ class _OtpScreenState extends State<OtpScreen> {
                             borderSide: BorderSide(
                               color: _isOtpIncorrect
                                   ? Colors.red
-                                  : Color(0xffFF8D41),
+                                  : const Color(0xffFF8D41),
                               width: 2,
                             ),
                             borderRadius: BorderRadius.circular(8),
@@ -251,11 +269,11 @@ class _OtpScreenState extends State<OtpScreen> {
                             borderSide: BorderSide(
                               color: _isOtpIncorrect
                                   ? Colors.red
-                                  : Color(0xffA3A3A3),
+                                  : const Color(0xffA3A3A3),
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: EdgeInsets.only(bottom: 5),
+                          contentPadding: const EdgeInsets.only(bottom: 5),
                         ),
                         onChanged: (value) {
                           if (value.length == 1 && index < 3) {
@@ -274,42 +292,44 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
                 ElevatedButton(
                   onPressed: _isOtpComplete ? _verifyOtp : null,
-                  child: Text(
-                    "Next",
-                    style: TextStyle(
-                      fontFamily: "MontserratSB",
-                      fontSize: 16,
-                    ),
-                  ),
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.disabled)) {
-                          return Color(0xffC2C2C2);
+                    backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                      (Set<WidgetState> states) {
+                        if (states.contains(WidgetState.disabled)) {
+                          return const Color(0xffC2C2C2);
                         }
-                        return Color(0xffFF8D41);
+                        return const Color(0xffFF8D41);
                       },
                     ),
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.disabled)) {
-                          return Color(0xff626262);
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(
+                      (Set<WidgetState> states) {
+                        if (states.contains(WidgetState.disabled)) {
+                          return const Color(0xff626262);
                         }
-                        return Color(0xffFFFFFF);
+                        return const Color(0xffFFFFFF);
                       },
                     ),
-                    minimumSize:
-                        MaterialStateProperty.all(Size(double.infinity, 50)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    minimumSize: WidgetStateProperty.all(
+                        const Size(double.infinity, 50)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     )),
                   ),
+                  child: (!authController.isLoading.value)
+                      ? const Text(
+                          "Next",
+                          style: TextStyle(
+                            fontFamily: "MontserratSB",
+                            fontSize: 16,
+                          ),
+                        )
+                      : const CircularProgressIndicator(),
                 ),
-                SizedBox(height: 30),
-                Text(
+                const SizedBox(height: 30),
+                const Text(
                   "Didn't get code?",
                   style: TextStyle(
                     fontFamily: "MontserratR",
@@ -317,7 +337,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     color: Color(0xff7C7C7C),
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 GestureDetector(
                   onTap: _isResendButtonDisabled ? null : _resendOtp,
                   child: Text(
@@ -326,12 +346,12 @@ class _OtpScreenState extends State<OtpScreen> {
                         : "Resend",
                     style: TextStyle(
                       decoration: TextDecoration.underline,
-                      decorationColor: Color(0xffFF8D41),
+                      decorationColor: const Color(0xffFF8D41),
                       fontFamily: "MontserratR",
                       fontSize: 12,
                       color: _isResendButtonDisabled
                           ? Colors.grey
-                          : Color(0xffFF8D41),
+                          : const Color(0xffFF8D41),
                     ),
                   ),
                 ),

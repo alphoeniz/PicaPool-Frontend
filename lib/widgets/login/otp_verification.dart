@@ -232,7 +232,6 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                 LargeButton(
                     text: "Submit",
                     onPressed: () {
-                      //TODO: handle this properly
                       showModalBottomSheet(
                           isScrollControlled: true,
                           isDismissible: false,
