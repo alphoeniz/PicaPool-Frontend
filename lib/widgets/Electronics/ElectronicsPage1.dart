@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
-import 'package:picapool/widgets/Sell_Form_Page0.dart';
+import 'package:picapool/screens/sell/select_category_page.dart';
 import 'package:picapool/widgets/Electronics/ElectronicsPage2.dart';
 
 class ElectronicsPage1 extends StatefulWidget {
@@ -14,15 +14,11 @@ class ElectronicsPage1 extends StatefulWidget {
 }
 
 class _ElectronicsPage1State extends State<ElectronicsPage1> {
-  String currentLocation = "6th st, Connaught place, New Delhi, India";
+
   List<File> _imageFiles = []; // Store cropped images
   int selectedConditionIndex = -1; // To keep track of selected condition
 
-  void _updateLocation(String location) {
-    setState(() {
-      currentLocation = location;
-    });
-  }
+
 
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
@@ -45,14 +41,14 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
       aspectRatioPresets: [
         CropAspectRatioPreset.square,
       ],
-      androidUiSettings: AndroidUiSettings(
+      androidUiSettings: const AndroidUiSettings(
         toolbarTitle: 'Crop Image',
         toolbarColor: Colors.orange,
         toolbarWidgetColor: Colors.white,
         initAspectRatio: CropAspectRatioPreset.square,
         lockAspectRatio: true,
       ),
-      iosUiSettings: IOSUiSettings(
+      iosUiSettings: const IOSUiSettings(
         minimumAspectRatio: 1.0,
       ),
     );
@@ -68,87 +64,16 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
           const SizedBox(height: 50),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  InkWell(
-                    onTap: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LocationScreen(),
-                        ),
-                      );
-                      if (result != null) {
-                        _updateLocation(result);
-                      }
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 35,
-                          color: Colors.black,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  'Location',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                Icon(
-                                  Icons.arrow_drop_down,
-                                  size: 20,
-                                  color: Colors.black,
-                                ),
-                              ],
-                            ),
-                            Text(
-                              currentLocation.length > 30
-                                  ? '${currentLocation.substring(0, 30)}...'
-                                  : currentLocation,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.black,
-                    child: Icon(
-                      Icons.person,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back, color: Color(0xffFF8D41),),
+                  icon: const Icon(Icons.arrow_back, color: Color(0xffFF8D41),),
                   onPressed: () {
                     Navigator.pop(context);
                   },
                 ),
-                SizedBox(width: 8),
-                Text(
+                const SizedBox(width: 8),
+                const Text(
                   'Include some details',
                   style: TextStyle(
                     fontFamily: "MontserratM",
@@ -168,7 +93,7 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                     padding: const EdgeInsets.all(20.0),
                     child: StepIndicator(currentStep: 2),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 20),
                     child: Center(
@@ -182,7 +107,7 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                                   color: Colors.grey[200],
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                child: Column(
+                                child: const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.add_photo_alternate_outlined, size: 60, color: Colors.orange),
@@ -215,7 +140,7 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                                             right: 10,
                                             child: GestureDetector(
                                               onTap: _pickImage,
-                                              child: CircleAvatar(
+                                              child: const CircleAvatar(
                                                 radius: 15,
                                                 backgroundColor: Colors.orange,
                                                 child: Icon(Icons.add, color: Colors.white),
@@ -231,13 +156,13 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 20),
                     child: buildTextField(
                         label: 'Device Type:', hintText: 'e.g., laptop, smartphone'),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 20),
                     child: Row(
@@ -245,14 +170,14 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                         Expanded(
                           child: buildTextField(label: 'Model name', hintText: ''),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: buildTextField(label: 'Brand', hintText: ''),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 20),
                     child: buildTextField(
@@ -260,20 +185,20 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                         hintText: 'e.g., description details',
                         maxLength: 200),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 20),
                     child: buildTextField(
                         label: 'Accessories Included', hintText: ''),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 20),
                     child: buildTextField(label: 'MRP', hintText: ''),
                   ),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                  const SizedBox(height: 20),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 20.0, right: 20.0),
                     child: Text(
                       'Condition',
                       style: TextStyle(
@@ -283,7 +208,7 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -307,7 +232,7 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 20.0),
                     child: Center(
@@ -322,13 +247,13 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xffFF8D41),
+                            backgroundColor: const Color(0xffFF8D41),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25),
                             ),
-                            padding: EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
@@ -350,7 +275,7 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -376,7 +301,7 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(
-              color: isSelected ? Colors.orange : Color(0xffA3A3A3)),
+              color: isSelected ? Colors.orange : const Color(0xffA3A3A3)),
           borderRadius: BorderRadius.circular(15),
         ),
         width: 100,
@@ -387,14 +312,14 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
           children: [
             SvgPicture.asset(
               svgPath,
-              color: isSelected ? Colors.black : Color(0xffA3A3A3),
+              color: isSelected ? Colors.black : const Color(0xffA3A3A3),
               width: 40,
               height: 40,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                   fontFamily: "MontserratR",
                   fontSize: 12,
                   color: Colors.black),
@@ -413,36 +338,36 @@ class _ElectronicsPage1State extends State<ElectronicsPage1> {
         RichText(
           text: TextSpan(
             text: label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black87,
               fontSize: 16,
               fontFamily: 'MontserratR',
             ),
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         TextField(
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.transparent,
             hintText: hintText,
-            hintStyle: TextStyle(
+            hintStyle: const TextStyle(
               color: Colors.grey,
               fontFamily: 'MontserratR',
               fontSize: 12,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Color(0xFFA3A3A3), width: 1),
+              borderSide: const BorderSide(color: Color(0xFFA3A3A3), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Color(0xFFFF8D41), width: 2),
+              borderSide: const BorderSide(color: Color(0xFFFF8D41), width: 2),
             ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           ),
           maxLength: maxLength,
-          style: TextStyle(fontSize: 14, fontFamily: 'MontserratR'),
+          style: const TextStyle(fontSize: 14, fontFamily: 'MontserratR'),
         ),
       ],
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:picapool/screens/Products/products_homePage.dart';
-import 'package:picapool/widgets/Sell_Form_Page0.dart';
+import 'package:picapool/screens/sell/select_category_page.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   const ProductDetailsPage({super.key});

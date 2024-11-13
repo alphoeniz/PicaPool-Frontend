@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/widgets/clothes/ClothesPage2.dart';
-import 'package:picapool/widgets/Sell_Form_Page0.dart';
+import 'package:picapool/screens/sell/select_category_page.dart';
 import 'package:picapool/widgets/Electronics/ElectronicsPage2.dart';
 
 class ClothesPage1 extends StatefulWidget {

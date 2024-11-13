@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
-import 'package:picapool/widgets/Sell_Form_Page0.dart';
+import 'package:picapool/screens/sell/select_category_page.dart';
 
 class BooksPage2 extends StatefulWidget {
   @override
