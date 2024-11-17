@@ -1,22 +1,32 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
+import 'package:get/get_instance/get_instance.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:picapool/controllers/network_controller.dart';
+import 'package:picapool/controllers/sell_form_controller.dart';
 import 'package:picapool/firebase_options.dart';
 import 'package:picapool/screen_router.dart';
 import 'package:picapool/screens/Public%20Chat/publicChatScreen.dart';
 import 'package:picapool/screens/chats/chat_homeScreen.dart';
 import 'package:picapool/screens/home_screen.dart';
 import 'package:picapool/screens/login_screen.dart';
+import 'package:picapool/utils/routes.dart';
 
-void main() async{
-    WidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: ".env");
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
-    runApp(const MyApp());
-  }
-
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await SystemChrome.setPreferredOrientations(
+    <DeviceOrientation>[
+      DeviceOrientation.portraitUp
+    ]
+  );
+  Get.put(FormController());
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -25,6 +35,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      enableLog: true,
+      
       title: 'picapool',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -32,11 +44,9 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           textSelectionTheme:
               const TextSelectionThemeData(cursorColor: Color(0xffffffff))),
-      // home: const LoginScreen(),
-      // home: const HomeScreen(),
-      home: PublicChatPage(),
-      // home: const CreateCabShareScreen(),
-      // home: const CreatePoolScreen(),
+      // Implement Auth
+      // tokenExists ? homeScreen : loginScreen
+      getPages: GetRoutes.routes,
     );
   }
 }
