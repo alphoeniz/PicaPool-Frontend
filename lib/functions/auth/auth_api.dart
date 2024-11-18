@@ -8,12 +8,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:picapool/core/core.dart';
 import 'package:picapool/models/auth_model.dart';
+import 'package:picapool/models/response_model.dart';
 import 'package:picapool/models/user_model.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-
 class AuthApi {
-  
   FutureEither<Auth> signInWithGoogle() async {
     final GoogleSignIn googleSignIn = GoogleSignIn(
       scopes: ['profile', 'email'],
@@ -39,7 +38,7 @@ class AuthApi {
 
       if (statusCode >= 200 && statusCode < 300) {
         var auth = jsonDecode(response.body);
-        return right(Auth.fromJson(auth));
+        return right(Auth.fromJson(auth['data']));
       } else {
         return left(
           Failure(
@@ -59,7 +58,6 @@ class AuthApi {
     }
   }
 
-  
   FutureEither<Auth> signInWithApple() async {
     try {
       final AuthorizationCredentialAppleID appleCredential =
@@ -81,7 +79,7 @@ class AuthApi {
 
       if (statusCode >= 200 && statusCode < 300) {
         var auth = jsonDecode(response.body);
-        return right(Auth.fromJson(auth));
+        return right(Auth.fromJson(auth['data']));
       } else {
         return left(
           Failure(
@@ -153,7 +151,7 @@ class AuthApi {
 
     if (statusCode >= 200 && statusCode < 300) {
       var auth = jsonDecode(response.body);
-      return right(Auth.fromJson(auth));
+      return right(Auth.fromJson(auth['data']));
     } else {
       return left(
         Failure(
@@ -302,7 +300,8 @@ class AuthApi {
     }
   }
 
-  FutureEither<User> getUser({required int userId, required String accessToken}) async {
+  FutureEither<User> getUser(
+      {required int userId, required String accessToken}) async {
     try {
       var response = await http.get(
         Uri.parse('https://api.picapool.com/v2/user/$userId'),
@@ -313,15 +312,15 @@ class AuthApi {
       );
       int statusCode = response.statusCode;
       if (statusCode >= 200 && statusCode <= 300) {
-        var json = jsonDecode(response.body);
-        debugPrint("getUser Response: $json");
-        if (json['success']) {
-          var user = User.fromJson(json['data']);
+        var responseModel = ResponseModel.fromJson(jsonDecode(response.body));
+        debugPrint("getUser Response: ${response.body}");
+        if (responseModel.success) {
+          var user = User.fromJson(responseModel.data);
           return right(user);
         } else {
           return left(
             Failure(
-              message: json['message'],
+              message: responseModel.message,
               stackTrace: StackTrace.current,
             ),
           );
@@ -333,7 +332,8 @@ class AuthApi {
 
         return left(
           Failure(
-            message: "Not able to get the user : status code $response",
+            message:
+                "Not able to get the user : status code ${response.statusCode} with me",
             stackTrace: StackTrace.current,
           ),
         );
@@ -407,7 +407,6 @@ class AuthApi {
       if (response.statusCode < 300) {
         String newAccessToken = response.body;
         debugPrint('New Access Token: $newAccessToken');
-
         return newAccessToken;
       } else {
         return null;

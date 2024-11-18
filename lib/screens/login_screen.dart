@@ -189,14 +189,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(25),
                     )),
                   ),
-                  child: const Text(
-                    "Send OTP",
-                    style: TextStyle(
-                      fontFamily: "MontserratSB",
-                      color: Color(0xffFFFFFF),
-                      fontSize: 16,
-                    ),
-                  ),
+                  child: authController.isLoading.value
+                      ? const CircularProgressIndicator()
+                      : const Text(
+                          "Send OTP",
+                          style: TextStyle(
+                            fontFamily: "MontserratSB",
+                            color: Color(0xffFFFFFF),
+                            fontSize: 16,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 40),
                 const Row(

@@ -229,6 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               title: 'Logout',
                               onTap: () {
                                 _showLogoutModal(context);
+                                setState(() {});
                               },
                             ),
                           ],
