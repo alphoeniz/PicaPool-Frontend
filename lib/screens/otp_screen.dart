@@ -209,6 +209,8 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var isLoading = authController.notLoading;
+
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
@@ -318,7 +320,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       borderRadius: BorderRadius.circular(25),
                     )),
                   ),
-                  child: (!authController.isLoading.value)
+                  child: (!isLoading)
                       ? const Text(
                           "Next",
                           style: TextStyle(

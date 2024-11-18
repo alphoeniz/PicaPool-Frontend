@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:picapool/screens/Public%20Chat/publicChatScreen.dart';
 
 class AlertsPage extends StatefulWidget {
+  const AlertsPage({super.key});
+
   @override
   _AlertsPageState createState() => _AlertsPageState();
 }
@@ -45,10 +47,10 @@ class _AlertsPageState extends State<AlertsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff02005D),
+      backgroundColor: const Color(0xff02005D),
       appBar: AppBar(
-        title: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
+        title: const Padding(
+          padding: EdgeInsets.only(left: 8.0),
           child: Text(
             'Alerts',
             style: TextStyle(
@@ -60,14 +62,14 @@ class _AlertsPageState extends State<AlertsPage> {
         ),
         automaticallyImplyLeading: false,
         elevation: 0,
-        backgroundColor: Color(0xff02005D),
+        backgroundColor: const Color(0xff02005D),
       ),
       body: Column(
         children: [
           // Category Buttons
           Container(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            color: Color(0xff02005D),
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            color: const Color(0xff02005D),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Padding(
@@ -124,7 +126,7 @@ class _AlertsPageState extends State<AlertsPage> {
             child: Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Container(
-                decoration: BoxDecoration(color: Colors.white),
+                decoration: const BoxDecoration(color: Colors.white),
                 child: Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: ListView.builder(
@@ -139,7 +141,7 @@ class _AlertsPageState extends State<AlertsPage> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                           child: AnimatedContainer(
-                            duration: Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
                             height: expandedStates[index] ? 240 : 120, // Adjust the height to fit content
                             width: double.infinity,
@@ -170,12 +172,12 @@ class _AlertsPageState extends State<AlertsPage> {
                                                 children: [
                                                   Text(
                                                     alerts[index]['title'] ?? '',
-                                                    style: TextStyle(fontSize: 16, fontFamily: "MontserratM"),
+                                                    style: const TextStyle(fontSize: 16, fontFamily: "MontserratM"),
                                                   ),
-                                                  SizedBox(width: 8),
+                                                  const SizedBox(width: 8),
                                                   Text(
                                                     alerts[index]['time'] ?? '',
-                                                    style: TextStyle(
+                                                    style: const TextStyle(
                                                       fontSize: 12,
                                                       fontFamily: "MontserratM",
                                                       color: Color(0xff7B7B7B),
@@ -183,7 +185,7 @@ class _AlertsPageState extends State<AlertsPage> {
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(height: 5),
+                                              const SizedBox(height: 5),
                                               Row(
                                                 children: [
                                                   Image.asset(
@@ -191,10 +193,10 @@ class _AlertsPageState extends State<AlertsPage> {
                                                     width: 15,
                                                     height: 15,
                                                   ),
-                                                  SizedBox(width: 2),
+                                                  const SizedBox(width: 2),
                                                   Text(
                                                     alerts[index]['category'] ?? '',
-                                                    style: TextStyle(
+                                                    style: const TextStyle(
                                                       fontSize: 14,
                                                       fontFamily: "MontserratM",
                                                       color: Color(0xff7B7B7B),
@@ -204,7 +206,7 @@ class _AlertsPageState extends State<AlertsPage> {
                                               ),
                                             ],
                                           ),
-                                        Spacer(),
+                                        const Spacer(),
                                         // Expanded state: Show additional information
                                         if (expandedStates[index])
                                           Column(
@@ -212,21 +214,21 @@ class _AlertsPageState extends State<AlertsPage> {
                                             children: [
                                               Text(
                                                 alerts[index]['details'] ?? '',
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   fontSize: 14,
                                                   fontFamily: "MontserratM",
                                                   color: Colors.black,
                                                 ),
                                               ),
-                                              SizedBox(height: 5),
+                                              const SizedBox(height: 5),
                                               if (alerts[index]['expires_in'] != null)
                                                 Row(
                                                   children: [
-                                                    Icon(Icons.access_time, size: 18, color: Colors.orange),
-                                                    SizedBox(width: 5),
+                                                    const Icon(Icons.access_time, size: 18, color: Colors.orange),
+                                                    const SizedBox(width: 5),
                                                     Text(
                                                       "Expires in ${alerts[index]['expires_in']}",
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         fontSize: 14,
                                                         fontFamily: "MontserratM",
                                                         color: Colors.black,
@@ -234,15 +236,15 @@ class _AlertsPageState extends State<AlertsPage> {
                                                     ),
                                                   ],
                                                 ),
-                                              SizedBox(height: 5),
+                                              const SizedBox(height: 5),
                                               if (alerts[index]['distance'] != null)
                                                 Row(
                                                   children: [
-                                                    Icon(Icons.location_on, size: 18, color: Colors.orange),
-                                                    SizedBox(width: 5),
+                                                    const Icon(Icons.location_on, size: 18, color: Colors.orange),
+                                                    const SizedBox(width: 5),
                                                     Text(
                                                       alerts[index]['distance'] ?? '',
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         fontSize: 14,
                                                         fontFamily: "MontserratM",
                                                         color: Colors.black,
@@ -250,15 +252,15 @@ class _AlertsPageState extends State<AlertsPage> {
                                                     ),
                                                   ],
                                                 ),
-                                              SizedBox(height: 5),
+                                              const SizedBox(height: 5),
                                               if (alerts[index]['people_in_chat'] != null)
                                                 Row(
                                                   children: [
-                                                    Icon(Icons.group, size: 18, color: Colors.orange),
-                                                    SizedBox(width: 5),
+                                                    const Icon(Icons.group, size: 18, color: Colors.orange),
+                                                    const SizedBox(width: 5),
                                                     Text(
                                                       alerts[index]['people_in_chat'] ?? '',
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         fontSize: 14,
                                                         fontFamily: "MontserratM",
                                                         color: Colors.black,
@@ -266,19 +268,19 @@ class _AlertsPageState extends State<AlertsPage> {
                                                     ),
                                                   ],
                                                 ),
-                                              SizedBox(height: 10),
+                                              const SizedBox(height: 10),
                                               Center(
                                                 child: ElevatedButton(
                                                   onPressed: () {
                                                     Navigator.push(context, MaterialPageRoute(builder: (context) => PublicChatPage()));
                                                   },
                                                   style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Color(0xffFF8D41),
+                                                    backgroundColor: const Color(0xffFF8D41),
                                                     shape: RoundedRectangleBorder(
                                                       borderRadius: BorderRadius.circular(20),
                                                     ),
                                                   ),
-                                                  child: Text(
+                                                  child: const Text(
                                                     'Join Chat',
                                                     style: TextStyle(
                                                       fontFamily: "MontserratM",
@@ -300,8 +302,8 @@ class _AlertsPageState extends State<AlertsPage> {
                                                     width: 15,
                                                     height: 15,
                                                   ),
-                                                  SizedBox(width: 2),
-                                                  Text(
+                                                  const SizedBox(width: 2),
+                                                  const Text(
                                                     " 59:59",
                                                     style: TextStyle(fontSize: 16, fontFamily: "MontserratM"),
                                                   ),
@@ -313,17 +315,17 @@ class _AlertsPageState extends State<AlertsPage> {
                                                   children: [
                                                     Text(
                                                       expandedStates[index] ? "Hide Details" : "See Details",
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                           fontSize: 12,
                                                           fontFamily: "MontserratM"),
                                                     ),
-                                                    SizedBox(width: 2),
+                                                    const SizedBox(width: 2),
                                                     Icon(
                                                       expandedStates[index]
                                                           ? Icons.arrow_drop_up
                                                           : Icons.arrow_drop_down,
                                                       size: 15,
-                                                      color: Color(0xffFF8D41),
+                                                      color: const Color(0xffFF8D41),
                                                     ),
                                                   ],
                                                 ),
@@ -364,7 +366,7 @@ class CategoryButton extends StatelessWidget {
   final String image;
   final VoidCallback onTap;
 
-  CategoryButton({
+  const CategoryButton({super.key, 
     required this.label,
     required this.image,
     required this.onTap,
@@ -378,7 +380,7 @@ class CategoryButton extends StatelessWidget {
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
           foregroundColor: selected ? Colors.white : Colors.black,
-          backgroundColor: selected ? Color(0xffFF8D41) : Colors.white,
+          backgroundColor: selected ? const Color(0xffFF8D41) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),

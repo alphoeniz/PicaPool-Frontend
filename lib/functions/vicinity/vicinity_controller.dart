@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:picapool/functions/auth/auth_controller.dart';
-import 'package:picapool/models/offer_model.dart';
 import 'package:picapool/functions/vicinity/vicinity_api.dart';
 import 'package:picapool/models/vicinity_offer_model.dart';
 

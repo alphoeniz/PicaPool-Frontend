@@ -220,7 +220,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               imagePath: "assets/icons/Frame 59.png",
                               title: 'Logout',
                               onTap: () {
-                                _showLogoutModal(context); 
+                                _showLogoutModal(context);
+                                setState(() {});
                               },
                             ),
                           ],

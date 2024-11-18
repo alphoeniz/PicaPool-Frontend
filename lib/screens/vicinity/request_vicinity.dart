@@ -9,19 +9,23 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:picapool/functions/auth/auth_controller.dart';
 import 'package:http/http.dart' as http;
+import 'package:picapool/functions/location/location_provider.dart';
 import 'package:picapool/functions/vicinity/vicinity_api.dart';
 import 'package:picapool/functions/vicinity/vicinity_controller.dart';
 import 'package:picapool/models/offer_model.dart';
+import 'package:picapool/models/response_model.dart';
 import 'package:picapool/models/vicinity_offer_model.dart';
 
-class RequestVicinity extends ConsumerStatefulWidget {
+class RequestVicinity extends StatefulWidget {
   const RequestVicinity({super.key});
 
   @override
-  ConsumerState<RequestVicinity> createState() => _RequestVicinityState();
+  State<RequestVicinity> createState() => _RequestVicinityState();
 }
 
-class _RequestVicinityState extends ConsumerState<RequestVicinity> {
+class _RequestVicinityState extends State<RequestVicinity> {
+  var locationController = Get.find<LocationController>();
+
   double _radius = 500;
   double _waitTime = 30;
   bool _isCollapsed = false;
@@ -47,40 +51,48 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
   @override
   void initState() {
     super.initState();
-    _fetchLocation().whenComplete(() async {
-      getNearestUsers(authController.user.value!.id, _radius);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchLocation();
     });
   }
 
   Future<void> _fetchLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    // bool serviceEnabled;
+    // LocationPermission permission;
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Handle location service not enabled case
+    // serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    // if (!serviceEnabled) {
+    //   // Handle location service not enabled case
+    //   return;
+    // }
+
+    // permission = await Geolocator.checkPermission();
+    // if (permission == LocationPermission.denied) {
+    //   permission = await Geolocator.requestPermission();
+    //   if (permission == LocationPermission.denied) {
+    //     // Handle permission denied case
+    //     return;
+    //   }
+    // }
+
+    // if (permission == LocationPermission.deniedForever) {
+    //   // Handle permission permanently denied case
+    //   return;
+    // }
+
+    // Position position = await Geolocator.getCurrentPosition(
+    //     desiredAccuracy: LocationAccuracy.high);
+
+    await locationController.getLocation();
+    var location = locationController.state.value.location;
+    if (location == null) {
+      Get.snackbar('Error', 'Failed to get current location.');
       return;
     }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Handle permission denied case
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Handle permission permanently denied case
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      _currentPosition = LatLng(position.latitude, position.longitude);
+      _currentPosition = LatLng(location.latitude, location.longitude);
+
       _updateMarkersAndCircles();
       getNearestUsers(authController.user.value!.id, _radius);
 
@@ -678,12 +690,12 @@ class _RequestVicinityState extends ConsumerState<RequestVicinity> {
       print(response.body);
 
       if (response.statusCode < 300) {
-        var jsonResponse = jsonDecode(response.body);
-        if (jsonResponse['success'] == false) {
+        var responseModel = ResponseModel.fromJson(jsonDecode(response.body));
+        if (!responseModel.success) {
           return;
         }
 
-        var users = jsonResponse['data'] as List<dynamic>? ?? [];
+        var users = responseModel.data as List<dynamic>? ?? [];
         List<String> usersList = [];
 
         for (var user in users) {

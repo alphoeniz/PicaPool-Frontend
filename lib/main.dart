@@ -14,6 +14,7 @@ import 'package:picapool/functions/storage/storage_controller.dart';
 import 'package:picapool/functions/vicinity/vicinity_api.dart';
 import 'package:picapool/functions/vicinity/vicinity_controller.dart';
 import 'package:picapool/screens/login_screen.dart';
+import 'package:picapool/screens/personal_details.dart';
 import 'package:picapool/utils/bindings.dart';
 
 import 'package:picapool/widgets/bottom_navbar/common_bottom_navbar.dart';
@@ -55,17 +56,14 @@ class MyApp extends StatelessWidget {
   }
 
   Widget _handleAuthState(AuthController authController) {
-    if (authController.isLoading.value) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    } else if (authController.auth.value != null &&
-        authController.user.value != null) {
-      return const NewBottomBar();
-    } else {
+    if (authController.auth.value == null ||
+        authController.auth.value!.accessToken == null) {
       return const LoginScreen();
+    } else if (authController.user.value == null ||
+        authController.user.value!.name == null) {
+      return const PersonalDetails();
+    } else {
+      return const NewBottomBar();
     }
   }
 }

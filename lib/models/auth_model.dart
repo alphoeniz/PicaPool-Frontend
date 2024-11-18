@@ -38,9 +38,8 @@ class Auth {
     this.accessToken,
   });
 
-  factory Auth.fromJson(Map<String, dynamic> jsonData) {
-    debugPrint("Auth.fromJson: $jsonData");
-    var json = jsonData['data'];
+  factory Auth.fromJson(Map<String, dynamic> json) {
+    debugPrint("Auth.fromJson: $json");
     return Auth(
       // id: json['id'],
       googleSub: json['googleSub'],
@@ -57,7 +56,9 @@ class Auth {
           ? LivePartner.fromJson(json['livePartner'])
           : null,
       roles: json['roles'] != null
-          ? (json['roles'] as List).map((role) => Role.fromJson(role)).toList()
+          ? (json['roles'] as List?)
+              ?.map((role) => Role.fromJson(role))
+              .toList()
           : null,
       isNew: json['isNew'],
       isGuest: json['isGuest'],
