@@ -5,7 +5,7 @@ import 'package:get/get_navigation/get_navigation.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:picapool/utils/svg_icon.dart';
-import 'package:picapool/widgets/Sell_Form_Page0.dart';
+import 'package:picapool/screens/sell/select_category_page.dart';
 
 class BottomBarProduct extends StatefulWidget {
   const BottomBarProduct(
