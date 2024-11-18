@@ -1,0 +1,13 @@
+{
+  "id": 3,
+  "googleSub": "105777553440972260741",
+  "appleSub": null,
+  "mobile": null,
+  "User": null,
+  "Admin": null,
+  "Partner": null,
+  "LivePartner": null,
+  "Role": [{ "id": 1, "role": "user" }],
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZ29vZ2xlU3ViIjoiMTA1Nzc3NTUzNDQwOTcyMjYwNzQxIiwiYXBwbGVTdWIiOm51bGwsIm1vYmlsZSI6bnVsbCwiVXNlciI6bnVsbCwiQWRtaW4iOm51bGwsIlBhcnRuZXIiOm51bGwsIkxpdmVQYXJ0bmVyIjpudWxsLCJSb2xlIjpbeyJpZCI6MSwicm9sZSI6InVzZXIifV0sImlhdCI6MTcyNTY5ODE0MywiZXhwIjoxNzI2MzAyOTQzfQ.ZJn_OYqUgjfha5sp0-rZj1zNxqKxJ1jg8v_56fVm-PA",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZ29vZ2xlU3ViIjoiMTA1Nzc3NTUzNDQwOTcyMjYwNzQxIiwiYXBwbGVTdWIiOm51bGwsIm1vYmlsZSI6bnVsbCwiVXNlciI6bnVsbCwiQWRtaW4iOm51bGwsIlBhcnRuZXIiOm51bGwsIkxpdmVQYXJ0bmVyIjpudWxsLCJSb2xlIjpbeyJpZCI6MSwicm9sZSI6InVzZXIifV0sImlhdCI6MTcyNTY5ODE0MywiZXhwIjoxNzMzNDc0MTQzfQ.IKutEHnV7Mgua8iMvGTfFQlu0gmX3_DoBCPOR2PAADQ"
+}

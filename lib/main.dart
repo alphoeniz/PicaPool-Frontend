@@ -1,52 +1,58 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:get/get_instance/get_instance.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:picapool/controllers/network_controller.dart';
-import 'package:picapool/controllers/sell_form_controller.dart';
 import 'package:picapool/firebase_options.dart';
-import 'package:picapool/screen_router.dart';
-import 'package:picapool/screens/Public%20Chat/publicChatScreen.dart';
-import 'package:picapool/screens/chats/chat_homeScreen.dart';
-import 'package:picapool/screens/home_screen.dart';
+import 'package:picapool/functions/auth/auth_controller.dart';
+import 'package:picapool/functions/location/location_provider.dart';
+import 'package:picapool/functions/storage/storage_controller.dart';
+import 'package:picapool/functions/vicinity/vicinity_api.dart';
+import 'package:picapool/functions/vicinity/vicinity_controller.dart';
 import 'package:picapool/screens/login_screen.dart';
-import 'package:picapool/utils/routes.dart';
+import 'package:picapool/screens/personal_details.dart';
+import 'package:picapool/widgets/bottom_navbar/common_bottom_navbar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await SystemChrome.setPreferredOrientations(
-    <DeviceOrientation>[
-      DeviceOrientation.portraitUp
-    ]
-  );
-  Get.put(FormController());
+
+  Get.put(StorageController());
+  Get.put(AuthController());
+  Get.put(LocationController());
+  Get.put(VicinityApiController());
+  Get.put(VicinityController());
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final AuthController authController = Get.find<AuthController>();
+
     return GetMaterialApp(
-      enableLog: true,
-      
-      title: 'picapool',
+      title: 'Picapool',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-          textSelectionTheme:
-              const TextSelectionThemeData(cursorColor: Color(0xffffffff))),
-      // Implement Auth
-      // tokenExists ? homeScreen : loginScreen
-      getPages: GetRoutes.routes,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        textSelectionTheme:
+            const TextSelectionThemeData(cursorColor: Color(0xffffffff)),
+      ),
+      home: Obx(() => _handleAuthState(authController)),
     );
+  }
+
+  Widget _handleAuthState(AuthController authController) {
+    if (authController.auth.value == null ||
+        authController.auth.value!.accessToken == null) {
+      return const LoginScreen();
+    } else if (authController.user.value == null ||
+        authController.user.value!.name == null) {
+      return const PersonalDetails();
+    } else {
+      return const NewBottomBar();
+    }
   }
 }

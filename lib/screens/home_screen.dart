@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:picapool/screens/Products/products_homePage.dart';
-import 'package:picapool/utils/svg_icon.dart';
-import 'package:picapool/widgets/bottom_navbar/bottom_bar.dart';
-import 'package:picapool/widgets/bottom_navbar/common_bottom_navbar.dart';
 import 'package:picapool/widgets/home/down_sheet.dart';
 import 'package:picapool/widgets/home/explore.dart';
 
@@ -15,14 +11,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.dark));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.dark),
+    );
   }
 
   @override
@@ -36,7 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const ExploreWidget(),
             Container(
-                alignment: Alignment.bottomCenter, child: const DownSheet()),
+              alignment: Alignment.bottomCenter,
+              child: const DownSheet(),
+            ),
             // Container(alignment: Alignment.bottomCenter, child: const UpSheet())
           ],
         ),

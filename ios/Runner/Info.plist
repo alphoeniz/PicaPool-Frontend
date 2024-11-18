@@ -51,5 +51,19 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Description of why you are wanting this permission</string>
+
+	<!-- injecting from here -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.685376419732-3o9tkuo2bdq57a91baiifeo0cgdulcf6</string>
+			</array>
+		</dict>
+	</array>
+
 </dict>
 </plist>

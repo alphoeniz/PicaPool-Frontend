@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:picapool/screens/Middle%20Button/middleButton.dart';
-import 'package:picapool/screens/Products/products_homePage.dart';
 import 'package:picapool/screens/alerts/alertsPage.dart';
 import 'package:picapool/screens/ProfilePage/ProfilePage.dart';
 import 'package:picapool/screens/chats/chat_homeScreen.dart';
 import 'package:picapool/screens/home_screen.dart';
 import 'package:picapool/utils/svg_icon.dart';
+import 'package:picapool/widgets/home/location_widget.dart';
 
 class NewBottomBar extends StatefulWidget {
   final int currentIndex;
@@ -21,7 +21,7 @@ class _NewBottomBarState extends State<NewBottomBar> {
   double height = Platform.isAndroid ? 70 : 100;
 
   final List<Widget> _screens = [
-    HomeScreen(),
+    const HomeScreen(),
     MyChatsPage(),
     // ProductsHomepage(currentIndex: 1),
     AlertsPage(),
@@ -70,7 +70,7 @@ class _NewBottomBarState extends State<NewBottomBar> {
           Text(
             _titles[index],
             style: TextStyle(
-              color: isActive ? Color(0xffFF8D41) : Colors.black,
+              color: isActive ? const Color(0xffFF8D41) : Colors.black,
               fontSize: 12,
               fontFamily: 'MontserratR',
               fontWeight: FontWeight.w500,
@@ -89,7 +89,8 @@ class _NewBottomBarState extends State<NewBottomBar> {
         clipBehavior: Clip.none,
         children: [
           BottomAppBar(
-            child: Container(
+            color: Colors.white,
+            child: SizedBox(
               height: height,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -100,7 +101,7 @@ class _NewBottomBarState extends State<NewBottomBar> {
                   Expanded(
                     child: _buildNavItem(1),
                   ),
-                  SizedBox(width: 40), // The space for the center icon
+                  const SizedBox(width: 40), // The space for the center icon
                   Expanded(
                     child: _buildNavItem(2),
                   ),
@@ -110,11 +111,11 @@ class _NewBottomBarState extends State<NewBottomBar> {
                 ],
               ),
             ),
-            color: Colors.white,
           ),
           Positioned(
             top: -30, // Adjust this value to move the icon up or down
-            left: MediaQuery.of(context).size.width / 2 - 35, // Center the icon horizontally
+            left: MediaQuery.of(context).size.width / 2 -
+                35, // Center the icon horizontally
             child: InkWell(
               onTap: () {
                 Navigator.push(
@@ -122,8 +123,8 @@ class _NewBottomBarState extends State<NewBottomBar> {
                   MaterialPageRoute(builder: (context) => PoolOffersScreen()),
                 );
               },
-              child: SvgIcon(
-                "assets/bottombar/live.svg", 
+              child: const SvgIcon(
+                "assets/bottombar/live.svg",
                 size: 70, // Size of the center icon
               ),
             ),

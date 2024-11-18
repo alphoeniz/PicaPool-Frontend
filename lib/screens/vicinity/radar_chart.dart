@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-void main() => runApp(RadarChartApp());
+void main() => runApp(const RadarChartApp());
 
 class RadarChartApp extends StatelessWidget {
+  const RadarChartApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text('Radar Chart Animation')),
-        body: Center(child: RadarChartAnimation()),
+        appBar: AppBar(title: const Text('Radar Chart Animation')),
+        body: const Center(child: RadarChartAnimation()),
       ),
     );
   }
 }
 
 class RadarChartAnimation extends StatefulWidget {
+  const RadarChartAnimation({super.key});
+
   @override
   _RadarChartAnimationState createState() => _RadarChartAnimationState();
 }
@@ -30,7 +34,7 @@ class _RadarChartAnimationState extends State<RadarChartAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 10), // Slow, continuous animation
+      duration: const Duration(seconds: 10), // Slow, continuous animation
     )..repeat(); // Loop continuously without reversing
   }
 
@@ -63,7 +67,7 @@ class _RadarChartAnimationState extends State<RadarChartAnimation>
             builder: (context, child) {
               return CustomPaint(
                 painter: RadarChartPainter(_controller.value, _radius),
-                size: Size(300, 300),
+                size: const Size(300, 300),
               );
             },
           ),
@@ -116,4 +120,3 @@ class RadarChartPainter extends CustomPainter {
     return true;
   }
 }
-

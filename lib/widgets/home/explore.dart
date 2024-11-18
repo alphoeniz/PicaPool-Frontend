@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picapool/functions/location/location_provider.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/utils/svg_icon.dart';
 import 'package:picapool/widgets/home/location_widget.dart';
@@ -57,11 +59,7 @@ class _ExploreWidgetState extends State<ExploreWidget> {
                         _updateLocation(result);
                       }
                     },
-                    child: LocationWidget(
-                      location: currentLocation == "6th st, Connaught place, New Delhi, India"
-                          ? "New Delhi"
-                          : currentLocation,
-                    ),
+                    child: const LocationWidget(),
                   ),
                 ),
                 const SizedBox(
@@ -80,8 +78,7 @@ class _ExploreWidgetState extends State<ExploreWidget> {
                         elevation: WidgetStateProperty.resolveWith<double>(
                             (Set<WidgetState> states) => 0.0),
                         hintText: "Find Offers and Brands",
-                        backgroundColor:
-                            WidgetStateProperty.resolveWith<Color>(
+                        backgroundColor: WidgetStateProperty.resolveWith<Color>(
                           (Set<WidgetState> states) =>
                               const Color(0xff9A9A9A).withOpacity(0.2),
                         ),
@@ -111,7 +108,7 @@ class _ExploreWidgetState extends State<ExploreWidget> {
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),

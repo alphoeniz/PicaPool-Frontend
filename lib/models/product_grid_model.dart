@@ -4,39 +4,116 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:picapool/controllers/product_controller.dart';
 import 'package:picapool/screens/product_buy_page.dart';
-import 'package:picapool/utils/date_time_helper.dart';
 
-class  ProductGrid extends StatelessWidget {
+class ProductGrid extends StatelessWidget {
+  final List<Map<String, dynamic>> products = [
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Canon Camera',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'OnePlus Phone',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+    {
+      'image': 'assets/images/harrypotter.jpg',
+      'title': 'Harry Potter Book',
+      'price': '₹400',
+      'originalPrice': '₹1098',
+      'time': '2w ago',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ProductController>(
-        builder: (ProductController productInstance) {
-      return productInstance.productsState == ProductsState.productsLoaded
-          ?  productInstance.productsList.isEmpty ? const Center(child: Text('No Products') ,) :  GridView.builder(
-              padding: const EdgeInsets.all(10),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 3 / 4,
-              ),
-              // itemCount: products.length,
-              itemCount: productInstance.productsList.length,
-              itemBuilder: (context, index) {
-                return ProductItem(
-                  image:  productInstance.productsList[index].pic!.isEmpty ? "string" : productInstance.productsList[index].pic?.first ?? "string",
-                  title: productInstance.productsList[index].name ?? "No Name",
-                  price: productInstance.productsList[index].price.toString() ,
-                  offerPrice: productInstance.productsList[index].offerPriceMin.toString() ,
-                  time: productInstance.productsList[index].updatedAt?.toIso8601String() ?? " " ,
-                );
-              },
-            )
-          : const Center(
-              child: LinearProgressIndicator(),
-            );
-    });
+    return GridView.builder(
+      padding: const EdgeInsets.all(10),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 3 / 4,
+      ),
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        return ProductItem(
+          image: products[index]['image'],
+          title: products[index]['title'],
+          price: products[index]['price'],
+          originalPrice: products[index]['originalPrice'],
+          time: products[index]['time'],
+        );
+      },
+    );
   }
 }
 
@@ -88,7 +165,6 @@ class ProductItem extends StatelessWidget {
             Text(
               title,
               style: const TextStyle(
-                overflow: TextOverflow.ellipsis,
                 fontFamily: "MontserratR",
               ),
               maxLines: 1,
@@ -120,7 +196,7 @@ class ProductItem extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  DateTimeHelper.timeAgoSince(time),
+                  time,
                   style: const TextStyle(
                     fontFamily: "MontserratM",
                     fontWeight: FontWeight.normal,
