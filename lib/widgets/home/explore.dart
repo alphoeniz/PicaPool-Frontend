@@ -57,11 +57,11 @@ class _ExploreWidgetState extends State<ExploreWidget> {
                         _updateLocation(result);
                       }
                     },
-                    child: LocationWidget(
-                      location: currentLocation == "6th st, Connaught place, New Delhi, India"
-                          ? "New Delhi"
-                          : currentLocation,
-                    ),
+                    // child: LocationWidget(
+                    //   location: currentLocation == "6th st, Connaught place, New Delhi, India"
+                    //       ? "New Delhi"
+                    //       : currentLocation,
+                    // ),
                   ),
                 ),
                 const SizedBox(

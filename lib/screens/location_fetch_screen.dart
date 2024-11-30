@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:picapool/functions/location/location_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 
@@ -33,7 +34,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
   bool _is3DView = false;
   bool _isPinDragged = false;
 
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   List<String> savedLocations = [];
   List<Prediction> _predictions = [];
   bool _isKeyboardVisible = false;
@@ -171,18 +172,18 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
         circleId: const CircleId("currentLocationCircle"),
         center: _currentPosition!,
         radius: _animation.value,
-        strokeColor: Color(0xff333399).withOpacity(0.20),
+        strokeColor: const Color(0xff333399).withOpacity(0.20),
         strokeWidth: 2,
-        fillColor: Color(0xff5000FF).withOpacity(0.16),
+        fillColor: const Color(0xff5000FF).withOpacity(0.16),
       );
 
       _centerDotCircle = Circle(
         circleId: const CircleId("centerDotCircle"),
         center: _currentPosition!,
         radius: 8, // Fixed radius for the center dot
-        strokeColor: Color(0xff2D0090),
+        strokeColor: const Color(0xff2D0090),
         strokeWidth: 2,
-        fillColor: Color(0xff2D0090),
+        fillColor: const Color(0xff2D0090),
       );
 
       _pinMarker = Marker(
@@ -391,7 +392,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        backgroundColor: Color(0xffFF8D41).withOpacity(0.50),
+                        backgroundColor:
+                            const Color(0xffFF8D41).withOpacity(0.50),
                       ),
                       child: Text(
                         "Enable",
@@ -453,7 +455,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
                         controller: _searchController,
                         decoration: InputDecoration(
                           hintText: 'Search for areas, street...',
-                          hintStyle: TextStyle(
+                          hintStyle: const TextStyle(
                             color: Colors.grey,
                             fontFamily: 'MontserratR',
                             fontSize: 16,
@@ -631,7 +633,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
                           style: TextStyle(fontFamily: "MontserratM"),
                         ),
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Color(0xffFF8D41),
+                          foregroundColor: const Color(0xffFF8D41),
                           backgroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
@@ -644,10 +646,10 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                           child: Divider(
                             thickness: 1,
-                            color: const Color(0xffFF8D41),
+                            color: Color(0xffFF8D41),
                           ),
                         ),
                         Text(
@@ -657,10 +659,10 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
                             color: Colors.black,
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           child: Divider(
                             thickness: 1,
-                            color: const Color(0xffFF8D41),
+                            color: Color(0xffFF8D41),
                           ),
                         ),
                       ],
@@ -700,18 +702,19 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
                       onPressed: () {
                         Navigator.pop(context, _locationMessage);
                       },
-                      child: const Text(
-                        "Confirm Location",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: "MontserratSB",
-                            fontSize: 14),
-                      ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xffFF8D41),
+                        backgroundColor: const Color(0xffFF8D41),
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text(
+                        "Confirm Location",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: "MontserratSB",
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -751,19 +754,19 @@ class _LocationScreenState extends ConsumerState<LocationScreen>
                       onPressed: () {
                         Navigator.pop(context, _locationMessage);
                       },
-                      child: const Text(
-                        "Confirm Location",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: "MontserratSB",
-                            fontSize: 14),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
+                      ),
+                      child: const Text(
+                        "Confirm Location",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "MontserratSB",
+                            fontSize: 14),
                       ),
                     ),
                   ],

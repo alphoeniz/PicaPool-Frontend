@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:picapool/controllers/sell_form_controller.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
+import 'package:picapool/screens/sell/select_category_page.dart';
 import 'package:picapool/utils/routes.dart';
 import 'package:picapool/widgets/Sell_Form_Page0.dart';
 import 'package:picapool/widgets/sell/build_field.dart';

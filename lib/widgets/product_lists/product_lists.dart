@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:picapool/controllers/product_controller.dart';
 import 'package:picapool/models/product_grid_model.dart';
+import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/utils/routes.dart';
 import 'package:picapool/utils/svg_icon.dart';
 import 'package:picapool/screens/sell/select_category_page.dart';
@@ -59,9 +60,14 @@ class ProductListsPageState extends State<ProductListsPage> {
             color: Colors.white,
           ),
           onPressed: () {
-            Get.toNamed(
-              GetRoutes.categoryPage,
+            Navigator.push(context, 
+              MaterialPageRoute(builder: 
+                (context)=> const CategorySelectionPage()
+               )
             );
+            // Get.toNamed(
+            //   GetRoutes.categoryPage,
+            // );
           }),
       body: SizedBox(
           height: MediaQuery.of(context).size.height,

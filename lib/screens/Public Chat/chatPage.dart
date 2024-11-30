@@ -31,60 +31,60 @@ class _ChatPageState extends State<ChatPage> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  final List<MessageModel> publicMessages = [
-    MessageModel(
-      sender: "Shreya Roy",
-      message: "Hi, I am ready to pool, \npaying 400?",
-      time: "5:30 PM",
-      isMe: false,
-      imageUrl: 'https://via.placeholder.com/150',
-      showSenderDetails: true,
-    ),
-    MessageModel(
-      sender: "You",
-      message: "Hi, who all are willing to \npool for this offer?",
-      time: "5:31 PM",
-      isMe: true,
-      imageUrl: '',
-      showSenderDetails: false,
-    ),
-    MessageModel(
-      sender: "Pranav",
-      message: "Hi, I am ready to pool, \npaying 400?",
-      time: "5:32 PM",
-      isMe: false,
-      imageUrl: 'https://via.placeholder.com/150',
-      showSenderDetails: true,
-    ),
-    MessageModel(
-      sender: "Pranav",
-      message: "If you are paying 200 let \nme know",
-      time: "5:32 PM",
-      isMe: false,
-      imageUrl: 'https://via.placeholder.com/150',
-      showSenderDetails: false,
-    ),
-    MessageModel(
-      sender: "You",
-      message: "Hi, who all are willing to pool for \nthis offer?",
-      time: "5:34 PM",
-      isMe: true,
-      imageUrl: '',
-      showSenderDetails: false,
-      replyToMessage: "Hi, I am ready to pool, paying 400?",
-      replySender: "Pranav",
-    ),
-    MessageModel(
-      sender: "Pranav",
-      message: "Hi, I am ready to pool, \npaying 400?",
-      time: "5:36 PM",
-      isMe: false,
-      imageUrl: 'https://via.placeholder.com/150',
-      showSenderDetails: true,
-      replyToMessage: "Hi, who all are willing to pool for this offer?",
-      replySender: "You",
-    ),
-  ];
+  // final List<MessageModel> publicMessages = [
+  //   MessageModel(
+  //     sender: "Shreya Roy",
+  //     message: "Hi, I am ready to pool, \npaying 400?",
+  //     time: "5:30 PM",
+  //     isMe: false,
+  //     imageUrl: 'https://via.placeholder.com/150',
+  //     showSenderDetails: true,
+  //   ),
+  //   MessageModel(
+  //     sender: "You",
+  //     message: "Hi, who all are willing to \npool for this offer?",
+  //     time: "5:31 PM",
+  //     isMe: true,
+  //     imageUrl: '',
+  //     showSenderDetails: false,
+  //   ),
+  //   MessageModel(
+  //     sender: "Pranav",
+  //     message: "Hi, I am ready to pool, \npaying 400?",
+  //     time: "5:32 PM",
+  //     isMe: false,
+  //     imageUrl: 'https://via.placeholder.com/150',
+  //     showSenderDetails: true,
+  //   ),
+  //   MessageModel(
+  //     sender: "Pranav",
+  //     message: "If you are paying 200 let \nme know",
+  //     time: "5:32 PM",
+  //     isMe: false,
+  //     imageUrl: 'https://via.placeholder.com/150',
+  //     showSenderDetails: false,
+  //   ),
+  //   MessageModel(
+  //     sender: "You",
+  //     message: "Hi, who all are willing to pool for \nthis offer?",
+  //     time: "5:34 PM",
+  //     isMe: true,
+  //     imageUrl: '',
+  //     showSenderDetails: false,
+  //     replyToMessage: "Hi, I am ready to pool, paying 400?",
+  //     replySender: "Pranav",
+  //   ),
+  //   MessageModel(
+  //     sender: "Pranav",
+  //     message: "Hi, I am ready to pool, \npaying 400?",
+  //     time: "5:36 PM",
+  //     isMe: false,
+  //     imageUrl: 'https://via.placeholder.com/150',
+  //     showSenderDetails: true,
+  //     replyToMessage: "Hi, who all are willing to pool for this offer?",
+  //     replySender: "You",
+  //   ),
+  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +126,7 @@ class _ChatPageState extends State<ChatPage> with SingleTickerProviderStateMixin
           controller: _tabController,
           children: [
             // Public Chat Tab
-            PublicChatView(messages: publicMessages,),
+            PublicChatView(messages: [],),
             // Private Chat Tab
             PrivateChatView(),
           ],
@@ -141,7 +141,7 @@ class _ChatPageState extends State<ChatPage> with SingleTickerProviderStateMixin
 }
 
 class PublicChatView extends StatelessWidget {
-  final List<MessageModel> messages;
+  final List<dynamic> messages;
 
   PublicChatView({required this.messages});
 

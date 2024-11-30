@@ -8,15 +8,10 @@ import 'package:picapool/controllers/product_controller.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/services/products/entities/product_entity.dart';
 import 'package:picapool/utils/routes.dart';
-import 'package:picapool/widgets/Electronics/ElectronicsPage1.dart';
-import 'package:picapool/widgets/books/BooksPage1.dart';
-import 'package:picapool/widgets/clothes/ClothesPage1.dart';
-import 'package:picapool/widgets/furniture/Furniturepage1.dart';
-import 'package:picapool/widgets/others/OtherPage1.dart';
-import 'package:picapool/widgets/sports/SportsPage1.dart';
-// import 'package:picapool/widgets/vehicle/VehiclePage1.dart';
 
 class CategorySelectionPage extends StatefulWidget {
+  const CategorySelectionPage({super.key});
+
   @override
   State<CategorySelectionPage> createState() => _CategorySelectionPageState();
 }
@@ -222,10 +217,7 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
             padding: const EdgeInsets.only(bottom: 20.0),
             child: GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => OtherPage1()),
-                );
+               
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,

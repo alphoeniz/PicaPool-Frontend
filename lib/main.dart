@@ -16,6 +16,7 @@ import 'package:picapool/functions/vicinity/vicinity_controller.dart';
 import 'package:picapool/screens/login_screen.dart';
 import 'package:picapool/screens/personal_details.dart';
 import 'package:picapool/utils/bindings.dart';
+import 'package:picapool/utils/routes.dart';
 
 import 'package:picapool/widgets/bottom_navbar/common_bottom_navbar.dart';
 
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
     final AuthController authController = Get.find<AuthController>();
 
     return GetMaterialApp(
+      getPages: GetRoutes.routes,
       enableLog: true,
       initialBinding: GlobalBindings(),
       title: 'picapool',

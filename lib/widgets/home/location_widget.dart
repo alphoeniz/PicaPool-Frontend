@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picapool/functions/location/location_provider.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/utils/svg_icon.dart';
 
