@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Import flutter_svg package
 import 'package:get/get.dart';
 import 'package:picapool/controllers/category_controller.dart';
+import 'package:picapool/controllers/product_controller.dart';
 import 'package:picapool/screens/location_fetch_screen.dart';
+import 'package:picapool/services/products/entities/product_entity.dart';
 import 'package:picapool/utils/routes.dart';
 import 'package:picapool/widgets/Electronics/ElectronicsPage1.dart';
 import 'package:picapool/widgets/books/BooksPage1.dart';
@@ -12,7 +14,7 @@ import 'package:picapool/widgets/clothes/ClothesPage1.dart';
 import 'package:picapool/widgets/furniture/Furniturepage1.dart';
 import 'package:picapool/widgets/others/OtherPage1.dart';
 import 'package:picapool/widgets/sports/SportsPage1.dart';
-import 'package:picapool/widgets/vehicle/VehiclePage1.dart';
+// import 'package:picapool/widgets/vehicle/VehiclePage1.dart';
 
 class CategorySelectionPage extends StatefulWidget {
   @override
@@ -21,6 +23,7 @@ class CategorySelectionPage extends StatefulWidget {
 
 class _CategorySelectionPageState extends State<CategorySelectionPage> {
   CategoryController get categoryController => Get.find();
+  ProductController get productController => Get.find();
 
   @override
   void initState() {

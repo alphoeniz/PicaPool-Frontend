@@ -7,7 +7,7 @@ import 'package:picapool/widgets/clothes/ClothesPage1.dart';
 import 'package:picapool/widgets/furniture/Furniturepage1.dart';
 import 'package:picapool/widgets/others/OtherPage1.dart';
 import 'package:picapool/widgets/sports/SportsPage1.dart';
-import 'package:picapool/widgets/vehicle/VehiclePage1.dart';
+// import 'package:picapool/widgets/vehicle/VehiclePage1.dart';
 
 class CategorySelectionPage extends StatefulWidget {
   @override
@@ -218,11 +218,11 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                           svgPath: 'assets/icons/vehicle-1.svg',
                           label: 'Vehicle',
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => VehiclePage1()),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //       builder: (context) => VehiclePage1()),
+                            // );
                           },
                         ),
                       ),

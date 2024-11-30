@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:get/get_instance/get_instance.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:picapool/controllers/bindings/product_bindings.dart';
 import 'package:picapool/controllers/network_controller.dart';
 import 'package:picapool/controllers/sell_form_controller.dart';
 import 'package:picapool/firebase_options.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       enableLog: true,
-      
+      initialBinding: ProductBindings(),
       title: 'picapool',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

@@ -8,11 +8,12 @@ import 'package:picapool/screens/create_cab.dart';
 import 'package:picapool/screens/create_pool.dart';
 import 'package:picapool/screens/home_screen.dart';
 import 'package:picapool/screens/sell/sell_product_details_page.dart';
-import 'package:picapool/widgets/Electronics/sell_confirmation_form_page.dart';
+// import 'package:picapool/widgets/Electronics/sell_confirmation_form_page.dart';
 import 'package:picapool/widgets/product_lists/product_lists.dart';
 import 'package:picapool/screens/sell/select_category_page.dart';
 import 'package:picapool/widgets/sell/sell_confirmation_page.dart';
 import 'package:picapool/widgets/sell/sell_form.dart';
+import 'package:picapool/widgets/sell/sell_form_two.dart';
 
 class GetRoutes {
   static const String splash = '/';
@@ -85,22 +86,22 @@ class GetRoutes {
     _buildRoute(
       name: sellProductsFormPage, 
       page: const SellForm(), 
-      binding: CategoryBindings(),
+      binding: ProductBindings(),
     ),
     _buildRoute(
       name: sellProductsSecondFormPage, 
-      page: const SellFormSecond(), 
+      page:  SellFormTwo(), 
       binding: CategoryBindings(),
     ),
     _buildRoute(
       name: sellProductsConfirmationPage, 
       page: const SellConfirmationPage(), 
-      binding: CategoryBindings(),
+      binding: ProductBindings(),
     ),
     _buildRoute(
       name: sellProductsUserFormPage, 
       page: CategorySelectionPage(), 
-      binding: CategoryBindings(),
+      binding: ProductBindings(),
     ),
   ];
 
