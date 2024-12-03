@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:picapool/models/message_model.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -29,6 +30,61 @@ class _ChatPageState extends State<ChatPage> with SingleTickerProviderStateMixin
     _messageController.dispose();
     super.dispose();
   }
+
+  final List<MessageModel> publicMessages = [
+    MessageModel(
+      sender: "Shreya Roy",
+      message: "Hi, I am ready to pool, \npaying 400?",
+      time: "5:30 PM",
+      isMe: false,
+      imageUrl: 'https://via.placeholder.com/150',
+      showSenderDetails: true,
+    ),
+    MessageModel(
+      sender: "You",
+      message: "Hi, who all are willing to \npool for this offer?",
+      time: "5:31 PM",
+      isMe: true,
+      imageUrl: '',
+      showSenderDetails: false,
+    ),
+    MessageModel(
+      sender: "Pranav",
+      message: "Hi, I am ready to pool, \npaying 400?",
+      time: "5:32 PM",
+      isMe: false,
+      imageUrl: 'https://via.placeholder.com/150',
+      showSenderDetails: true,
+    ),
+    MessageModel(
+      sender: "Pranav",
+      message: "If you are paying 200 let \nme know",
+      time: "5:32 PM",
+      isMe: false,
+      imageUrl: 'https://via.placeholder.com/150',
+      showSenderDetails: false,
+    ),
+    MessageModel(
+      sender: "You",
+      message: "Hi, who all are willing to pool for \nthis offer?",
+      time: "5:34 PM",
+      isMe: true,
+      imageUrl: '',
+      showSenderDetails: false,
+      replyToMessage: "Hi, I am ready to pool, paying 400?",
+      replySender: "Pranav",
+    ),
+    MessageModel(
+      sender: "Pranav",
+      message: "Hi, I am ready to pool, \npaying 400?",
+      time: "5:36 PM",
+      isMe: false,
+      imageUrl: 'https://via.placeholder.com/150',
+      showSenderDetails: true,
+      replyToMessage: "Hi, who all are willing to pool for this offer?",
+      replySender: "You",
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +126,7 @@ class _ChatPageState extends State<ChatPage> with SingleTickerProviderStateMixin
           controller: _tabController,
           children: [
             // Public Chat Tab
-            PublicChatView(),
+            PublicChatView(messages: publicMessages,),
             // Private Chat Tab
             PrivateChatView(),
           ],
@@ -85,69 +141,32 @@ class _ChatPageState extends State<ChatPage> with SingleTickerProviderStateMixin
 }
 
 class PublicChatView extends StatelessWidget {
+  final List<MessageModel> messages;
+
+  PublicChatView({required this.messages});
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      children: [
-        ChatBubble(
-          sender: "Shreya Roy",
-          message: "Hi, I am ready to pool, \npaying 400?",
-          time: "5:30 PM",
-          isMe: false,
-          imageUrl: 'https://via.placeholder.com/150',
-          showSenderDetails: true,
-        ),
-        ChatBubble(
-          sender: "You",
-          message: "Hi, who all are willing to \npool for this offer?",
-          time: "5:31 PM",
-          isMe: true,
-          imageUrl: '',
-          showSenderDetails: false,
-        ),
-        ChatBubble(
-          sender: "Pranav",
-          message: "Hi, I am ready to pool, \npaying 400?",
-          time: "5:32 PM",
-          isMe: false,
-          imageUrl: 'https://via.placeholder.com/150',
-          showSenderDetails: true,
-        ),
-        ChatBubble(
-          sender: "Pranav",
-          message: "If you are paying 200 let \nme know",
-          time: "5:32 PM",
-          isMe: false,
-          imageUrl: 'https://via.placeholder.com/150',
-          showSenderDetails: false,
-        ),
-        // Reply message from you to Pranav at 5:34 PM
-        ChatBubble(
-          sender: "You",
-          message: "Hi, who all are willing to pool for \nthis offer?",
-          time: "5:34 PM",
-          isMe: true,
-          imageUrl: '',
-          showSenderDetails: false,
-          replyToMessage: "Hi, I am ready to pool, paying 400?",
-          replySender: "Pranav", // Specify who you are replying to
-        ),
-        // Reply message from Pranav to you at 5:36 PM
-        ChatBubble(
-          sender: "Pranav",
-          message: "Hi, I am ready to pool, \npaying 400?",
-          time: "5:36 PM",
-          isMe: false,
-          imageUrl: 'https://via.placeholder.com/150',
-          showSenderDetails: true,
-          replyToMessage: "Hi, who all are willing to pool for this offer?",
-          replySender: "You", // Specify the person being replied to
-        ),
-      ],
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        final message = messages[index];
+        return ChatBubble(
+          sender: message.sender,
+          message: message.message,
+          time: message.time,
+          isMe: message.isMe,
+          imageUrl: message.imageUrl ?? '',
+          showSenderDetails: message.showSenderDetails,
+          replyToMessage: message.replyToMessage,
+          replySender: message.replySender,
+        );
+      },
     );
   }
 }
+
 
 class ChatBubble extends StatelessWidget {
   final String sender;
