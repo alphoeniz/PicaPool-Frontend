@@ -6,8 +6,11 @@ import 'package:picapool/screens/location_fetch_screen.dart';
 import 'package:picapool/widgets/clothes/ClothesPage2.dart';
 import 'package:picapool/widgets/Sell_Form_Page0.dart';
 import 'package:picapool/widgets/Electronics/ElectronicsPage2.dart';
+import 'package:picapool/widgets/home/location_widget.dart';
 
 class ClothesPage1 extends StatefulWidget {
+  const ClothesPage1({super.key});
+
   @override
   State<ClothesPage1> createState() => _ClothesPage1State();
 }
@@ -41,82 +44,17 @@ class _ClothesPage1State extends State<ClothesPage1> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 50),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      onTap: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LocationScreen(),
-                          ),
-                        );
-                        if (result != null) {
-                          _updateLocation(result);
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 35,
-                            color: Colors.black,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    'Location',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_drop_down,
-                                    size: 20,
-                                    color: Colors.black,
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                currentLocation.length > 30
-                                    ? '${currentLocation.substring(0, 30)}...'
-                                    : currentLocation,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.black,
-                      child: Icon(
-                        Icons.person,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: LocationWidget(
+                color: Colors.black,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
+            const Padding(
+              padding: EdgeInsets.all(20.0),
               child: StepIndicator(currentStep: 2),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20),
               child: Center(
@@ -147,7 +85,7 @@ class _ClothesPage1State extends State<ClothesPage1> {
                                   bottom: 0,
                                   right: 0,
                                   child: IconButton(
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.add_circle,
                                       color: Colors.orange,
                                     ),
@@ -161,13 +99,13 @@ class _ClothesPage1State extends State<ClothesPage1> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20),
               child: buildTextField(
                   label: 'Style:', hintText: 'e.g., t-shirt, jeans, dress'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20),
               child: Row(
@@ -175,16 +113,16 @@ class _ClothesPage1State extends State<ClothesPage1> {
                   Expanded(
                     child: buildTextField(label: 'Fabric', hintText: 'abc'),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: buildTextField(label: 'Brand', hintText: 'abc'),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0, right: 20),
+            const SizedBox(height: 10),
+            const Padding(
+              padding: EdgeInsets.only(left: 20.0, right: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -197,20 +135,34 @@ class _ClothesPage1State extends State<ClothesPage1> {
                     ),
                   ),
                   SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizeOption(label: 'XS'),
-                      SizeOption(label: 'S'),
-                      SizeOption(label: 'M'),
-                      SizeOption(label: 'L'),
-                      SizeOption(label: 'XL'),
-                    ],
+                  FittedBox(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizeOption(label: 'XS'),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        SizeOption(label: 'S'),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        SizeOption(label: 'M'),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        SizeOption(label: 'L'),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        SizeOption(label: 'XL'),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20),
               child: buildTextField(
@@ -218,21 +170,25 @@ class _ClothesPage1State extends State<ClothesPage1> {
                   hintText: 'e.g., laptop, smartphone',
                   maxLength: 200),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20),
               child: buildTextField(label: 'MRP', hintText: 'abc'),
             ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ConditionOption(label: 'New', icon: Icons.new_label),
-                ConditionOption(label: 'Gently Used', icon: Icons.panorama_vertical),
-                ConditionOption(label: 'Used', icon: Icons.back_hand_rounded),
-              ],
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ConditionOption(label: 'New', icon: Icons.new_label),
+                  ConditionOption(
+                      label: 'Gently Used', icon: Icons.panorama_vertical),
+                  ConditionOption(label: 'Used', icon: Icons.back_hand_rounded),
+                ],
+              ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
               child: Center(
@@ -240,18 +196,17 @@ class _ClothesPage1State extends State<ClothesPage1> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => ClothesPage2()),
+                      MaterialPageRoute(builder: (context) => ClothesPage2()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xffFF8D41),
+                    backgroundColor: const Color(0xffFF8D41),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    padding: EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
@@ -272,7 +227,7 @@ class _ClothesPage1State extends State<ClothesPage1> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -287,36 +242,37 @@ class _ClothesPage1State extends State<ClothesPage1> {
         RichText(
           text: TextSpan(
             text: label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black87,
               fontSize: 16,
               fontFamily: 'MontserratR',
             ),
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         TextField(
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.transparent,
             hintText: hintText,
-            hintStyle: TextStyle(
+            hintStyle: const TextStyle(
               color: Colors.grey,
               fontFamily: 'MontserratR',
               fontSize: 12,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Color(0xFFA3A3A3), width: 1),
+              borderSide: const BorderSide(color: Color(0xFFA3A3A3), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Color(0xFFFF8D41), width: 2),
+              borderSide: const BorderSide(color: Color(0xFFFF8D41), width: 2),
             ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           ),
           maxLength: maxLength,
-          style: TextStyle(fontSize: 14, fontFamily: 'MontserratR'),
+          style: const TextStyle(fontSize: 14, fontFamily: 'MontserratR'),
         ),
       ],
     );
@@ -326,13 +282,12 @@ class _ClothesPage1State extends State<ClothesPage1> {
 class SizeOption extends StatelessWidget {
   final String label;
 
-  SizeOption({required this.label});
+  const SizeOption({super.key, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {},
-      child: Text(label),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
@@ -340,6 +295,7 @@ class SizeOption extends StatelessWidget {
         backgroundColor: Colors.grey[200],
         foregroundColor: Colors.black,
       ),
+      child: Text(label),
     );
   }
 }
@@ -348,14 +304,14 @@ class ConditionOption extends StatelessWidget {
   final String label;
   final IconData icon;
 
-  ConditionOption({required this.label, required this.icon});
+  const ConditionOption({super.key, required this.label, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: Color(0xffA3A3A3)),
+        border: Border.all(color: const Color(0xffA3A3A3)),
         borderRadius: BorderRadius.circular(15),
       ),
       width: 100,
@@ -364,10 +320,10 @@ class ConditionOption extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 60, color: Color(0xffA3A3A3)),
+          Icon(icon, size: 60, color: const Color(0xffA3A3A3)),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
                 fontFamily: "MontserratR", fontSize: 12, color: Colors.black),
           ),
         ],

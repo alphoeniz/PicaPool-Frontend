@@ -1,9 +1,20 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:picapool/functions/auth/auth_controller.dart';
+import 'package:http/http.dart' as http;
+import 'package:picapool/functions/location/location_provider.dart';
+import 'package:picapool/functions/vicinity/vicinity_api.dart';
+import 'package:picapool/functions/vicinity/vicinity_controller.dart';
+import 'package:picapool/models/offer_model.dart';
+import 'package:picapool/models/response_model.dart';
+import 'package:picapool/models/vicinity_offer_model.dart';
 
 class RequestVicinity extends StatefulWidget {
   const RequestVicinity({super.key});
@@ -13,6 +24,8 @@ class RequestVicinity extends StatefulWidget {
 }
 
 class _RequestVicinityState extends State<RequestVicinity> {
+  var locationController = Get.find<LocationController>();
+
   double _radius = 500;
   double _waitTime = 30;
   bool _isCollapsed = false;
@@ -24,43 +37,63 @@ class _RequestVicinityState extends State<RequestVicinity> {
   Marker? _pinMarker;
   Circle? _currentLocationCircle;
   bool _isMapInitialized = false; // New flag to check if the map is initialized
+  List<dynamic> _nearestUsers = [];
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+
+  int poolingUsers = 0;
+
+  final AuthController authController = Get.find<AuthController>();
+  final VicinityController vicinityController = Get.find<VicinityController>();
 
   @override
   void initState() {
     super.initState();
-    _fetchLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchLocation();
+    });
   }
 
   Future<void> _fetchLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    // bool serviceEnabled;
+    // LocationPermission permission;
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Handle location service not enabled case
+    // serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    // if (!serviceEnabled) {
+    //   // Handle location service not enabled case
+    //   return;
+    // }
+
+    // permission = await Geolocator.checkPermission();
+    // if (permission == LocationPermission.denied) {
+    //   permission = await Geolocator.requestPermission();
+    //   if (permission == LocationPermission.denied) {
+    //     // Handle permission denied case
+    //     return;
+    //   }
+    // }
+
+    // if (permission == LocationPermission.deniedForever) {
+    //   // Handle permission permanently denied case
+    //   return;
+    // }
+
+    // Position position = await Geolocator.getCurrentPosition(
+    //     desiredAccuracy: LocationAccuracy.high);
+
+    await locationController.getLocation();
+    var location = locationController.state.value.location;
+    if (location == null) {
+      Get.snackbar('Error', 'Failed to get current location.');
       return;
     }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Handle permission denied case
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Handle permission permanently denied case
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      _currentPosition = LatLng(position.latitude, position.longitude);
+      _currentPosition = LatLng(location.latitude, location.longitude);
+
       _updateMarkersAndCircles();
+      getNearestUsers(authController.user.value!.id, _radius);
 
       if (_controller != null && !_isMapInitialized) {
         _controller!.animateCamera(
@@ -71,8 +104,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
             ),
           ),
         );
-        _isMapInitialized =
-            true; // Map is now initialized with the current location
+        _isMapInitialized = true;
       }
     });
   }
@@ -83,7 +115,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
         _currentLocationCircle = Circle(
           circleId: const CircleId("currentLocationCircle"),
           center: _currentPosition!,
-          radius: 100,
+          radius: _radius,
           strokeColor: Colors.blue,
           strokeWidth: 2,
           fillColor: Colors.blue.withOpacity(0.3),
@@ -120,18 +152,62 @@ class _RequestVicinityState extends State<RequestVicinity> {
   }
 
   Future<void> _pickImages() async {
-    final pickedFiles = await _picker.pickMultiImage();
-    if (pickedFiles != null) {
+    final pickedFiles = await _picker.pickMultiImage(
+      imageQuality: 50,
+    );
+    if (pickedFiles.isNotEmpty) {
       setState(() {
         _imageFiles = pickedFiles.take(3).toList();
       });
     }
   }
 
+  void createVicinity() async {
+    if (_titleController.text.isEmpty || _descController.text.isEmpty) {
+      debugPrint("Please fill all the fields");
+      return;
+    }
+
+    var auth = authController.auth.value;
+
+    final userId = auth?.user?.id;
+    if (userId == null || auth == null) {
+      debugPrint("User ID is null");
+      return;
+    }
+
+    // final vicinityApi = ;
+    var url = await vicinityController.uploadImage(
+      _imageFiles!.first,
+      auth.user!.name!,
+      _titleController.text,
+    );
+
+    if (url == null) {
+      debugPrint("Error uploading image");
+      return;
+    }
+
+    final offer = VicinityOffer(
+      name: _titleController.text,
+      images: [url],
+      desc: _descController.text,
+      expiryAt: DateTime.now().add(Duration(minutes: _waitTime.toInt())),
+      creatorID: auth.user!.id,
+      category: 1,
+      brand: 1,
+    );
+
+    await vicinityController.createVicinity(
+      offer: offer,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Column(
           children: [
@@ -157,18 +233,18 @@ class _RequestVicinityState extends State<RequestVicinity> {
                 children: [
                   Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
                         child: Row(
                           children: [
                             Expanded(
                               child: Divider(
                                 indent: 25,
                                 thickness: 1,
-                                color: const Color(0xffFF8D41),
+                                color: Color(0xffFF8D41),
                               ),
                             ),
-                            const Text(
+                            Text(
                               "  Request Vicinity  ",
                               style: TextStyle(
                                   fontSize: 16, fontFamily: "MontserratM"),
@@ -177,7 +253,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
                               child: Divider(
                                 endIndent: 25,
                                 thickness: 1,
-                                color: const Color(0xffFF8D41),
+                                color: Color(0xffFF8D41),
                               ),
                             ),
                           ],
@@ -195,6 +271,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
                                     child: Column(
                                       children: [
                                         TextField(
+                                          controller: _titleController,
                                           decoration: InputDecoration(
                                             labelText: "Add Title",
                                             labelStyle: const TextStyle(
@@ -218,6 +295,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
                                         ),
                                         const SizedBox(height: 16),
                                         TextField(
+                                          controller: _descController,
                                           decoration: InputDecoration(
                                             labelText: "Add Description",
                                             labelStyle: const TextStyle(
@@ -392,22 +470,22 @@ class _RequestVicinityState extends State<RequestVicinity> {
                             ],
                           ),
                           child: Column(
-                            children: const [
-                              Text(
+                            children: [
+                              const Text(
                                 "Pooling with ",
                                 style: TextStyle(
                                     fontFamily: "MontserratM", fontSize: 10),
                               ),
                               Text(
-                                "56",
-                                style: TextStyle(
+                                "$poolingUsers",
+                                style: const TextStyle(
                                     fontFamily: "MontserratSB",
                                     fontSize: 16,
                                     color: Color(0xffFF8D41)),
                               ),
                               Text(
-                                "users",
-                                style: TextStyle(
+                                (poolingUsers > 1) ? "users" : "user",
+                                style: const TextStyle(
                                     fontFamily: "MontserratM", fontSize: 10),
                               ),
                             ],
@@ -425,16 +503,16 @@ class _RequestVicinityState extends State<RequestVicinity> {
               child: Column(
                 children: [
                   const SizedBox(height: 16),
-                  Row(
+                  const Row(
                     children: [
                       Expanded(
                         child: Divider(
                           indent: 25,
                           thickness: 1,
-                          color: const Color(0xffFF8D41),
+                          color: Color(0xffFF8D41),
                         ),
                       ),
-                      const Text(
+                      Text(
                         "  Radius and wait time  ",
                         style: TextStyle(
                           fontFamily: "MontserratM",
@@ -445,7 +523,7 @@ class _RequestVicinityState extends State<RequestVicinity> {
                         child: Divider(
                           endIndent: 25,
                           thickness: 1,
-                          color: const Color(0xffFF8D41),
+                          color: Color(0xffFF8D41),
                         ),
                       ),
                     ],
@@ -467,6 +545,15 @@ class _RequestVicinityState extends State<RequestVicinity> {
                             step: 100,
                             onChanged: (value) {
                               setState(() {
+                                _currentLocationCircle = Circle(
+                                  circleId:
+                                      const CircleId("currentLocationCircle"),
+                                  center: _currentPosition!,
+                                  radius: _radius,
+                                  strokeColor: Colors.blue,
+                                  strokeWidth: 2,
+                                  fillColor: Colors.blue.withOpacity(0.3),
+                                );
                                 _radius = value.toDouble();
                               });
                             },
@@ -532,15 +619,8 @@ class _RequestVicinityState extends State<RequestVicinity> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle Start Pooling
+                  createVicinity();
                 },
-                child: const Text(
-                  "Start Pooling",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: "MontserratSB",
-                      color: Colors.white),
-                ),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor: const Color(0xffFF8D41),
@@ -548,11 +628,82 @@ class _RequestVicinityState extends State<RequestVicinity> {
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
+                child: (vicinityController.isLoading.value)
+                    ? const CircularProgressIndicator()
+                    : const Text(
+                        "Start Pooling",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontFamily: "MontserratSB",
+                            color: Colors.white),
+                      ),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> getNearestUsers(int id, double radius) async {
+    String endpoint = "https://api.picapool.com/v2/user/nearest";
+    String? at = authController.auth.value?.accessToken;
+    if (at == null) {
+      return;
+    }
+
+    debugPrint(
+        'Fetching nearest users with coordinates : ${_currentPosition?.latitude}, ${_currentPosition?.longitude}');
+    try {
+      final response = await http.post(Uri.parse(endpoint),
+          body: jsonEncode({
+            'locationData': {
+              'lat': _currentPosition?.latitude ?? 0,
+              'long': _currentPosition?.longitude ?? 0,
+              'dist': radius,
+              'count': 10
+            }
+          }),
+          headers: {
+            'content-type': 'application/json',
+            'Authorization': 'Bearer $at'
+          });
+
+      print(response.body);
+
+      if (response.statusCode < 300) {
+        var responseModel = ResponseModel.fromJson(jsonDecode(response.body));
+        if (!responseModel.success) {
+          return;
+        }
+
+        var users = responseModel.data as List<dynamic>? ?? [];
+        List<String> usersList = [];
+
+        for (var user in users) {
+          usersList.add(
+            '${user['latitude']} ${user['longitude']}',
+          );
+        }
+
+        _nearestUsers = usersList;
+
+        setState(() {
+          poolingUsers = users.length;
+        });
+      } else if (response.statusCode == 401) {
+        debugPrint('Failed to load getNearestUsers - status code 401');
+        var success = await authController.updateAccessToken();
+        if (success) {
+          await getNearestUsers(id, radius);
+        }
+      } else {
+        debugPrint('Failed to load getNearestUsers - status code not 200');
+        return;
+      }
+    } catch (err) {
+      debugPrint('Failed to fetch getNearestUsers - $err');
+      return;
+    }
   }
 }

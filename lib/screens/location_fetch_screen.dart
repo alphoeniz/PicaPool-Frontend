@@ -1,21 +1,24 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:picapool/functions/location/location_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 
-class LocationScreen extends StatefulWidget {
+class LocationScreen extends ConsumerStatefulWidget {
   const LocationScreen({super.key});
 
   @override
   _LocationScreenState createState() => _LocationScreenState();
 }
 
-class _LocationScreenState extends State<LocationScreen>
+class _LocationScreenState extends ConsumerState<LocationScreen>
     with SingleTickerProviderStateMixin {
   GoogleMapController? _mapController;
   LatLng? _currentPosition;
@@ -31,7 +34,7 @@ class _LocationScreenState extends State<LocationScreen>
   bool _is3DView = false;
   bool _isPinDragged = false;
 
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   List<String> savedLocations = [];
   List<Prediction> _predictions = [];
   bool _isKeyboardVisible = false;
@@ -54,7 +57,7 @@ class _LocationScreenState extends State<LocationScreen>
       curve: Curves.easeInOut,
     ));
 
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkKeyboardVisibility();
     });
   }
@@ -129,11 +132,19 @@ class _LocationScreenState extends State<LocationScreen>
       _locationEnabled = true;
     });
 
+    final LocationController locationController =
+        Get.find<LocationController>();
+    await locationController.getLocation();
+
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+        locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+    ));
 
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
+
       _selectedPosition = _currentPosition;
       _updateMarkersAndCircles();
     });
@@ -161,18 +172,18 @@ class _LocationScreenState extends State<LocationScreen>
         circleId: const CircleId("currentLocationCircle"),
         center: _currentPosition!,
         radius: _animation.value,
-        strokeColor: Color(0xff333399).withOpacity(0.20),
+        strokeColor: const Color(0xff333399).withOpacity(0.20),
         strokeWidth: 2,
-        fillColor: Color(0xff5000FF).withOpacity(0.16),
+        fillColor: const Color(0xff5000FF).withOpacity(0.16),
       );
 
       _centerDotCircle = Circle(
         circleId: const CircleId("centerDotCircle"),
         center: _currentPosition!,
         radius: 8, // Fixed radius for the center dot
-        strokeColor: Color(0xff2D0090),
+        strokeColor: const Color(0xff2D0090),
         strokeWidth: 2,
-        fillColor: Color(0xff2D0090),
+        fillColor: const Color(0xff2D0090),
       );
 
       _pinMarker = Marker(
@@ -282,7 +293,7 @@ class _LocationScreenState extends State<LocationScreen>
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkKeyboardVisibility();
     });
 
@@ -347,31 +358,33 @@ class _LocationScreenState extends State<LocationScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.location_off, color: Colors.orange),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
+                    const Icon(Icons.location_off, color: Colors.orange),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FittedBox(
+                            child: Text(
                               "Device Location Not enable",
                               style: GoogleFonts.montserrat(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Text(
+                          ),
+                          FittedBox(
+                            child: Text(
                               "Enable for better Experience",
                               style: GoogleFonts.montserrat(
                                 color: Colors.grey,
-                                fontSize: 12,
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 4),
                     ElevatedButton(
                       onPressed: _fetchLocation,
                       style: ElevatedButton.styleFrom(
@@ -379,7 +392,8 @@ class _LocationScreenState extends State<LocationScreen>
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        backgroundColor: Color(0xffFF8D41).withOpacity(0.50),
+                        backgroundColor:
+                            const Color(0xffFF8D41).withOpacity(0.50),
                       ),
                       child: Text(
                         "Enable",
@@ -441,7 +455,7 @@ class _LocationScreenState extends State<LocationScreen>
                         controller: _searchController,
                         decoration: InputDecoration(
                           hintText: 'Search for areas, street...',
-                          hintStyle: TextStyle(
+                          hintStyle: const TextStyle(
                             color: Colors.grey,
                             fontFamily: 'MontserratR',
                             fontSize: 16,
@@ -619,7 +633,7 @@ class _LocationScreenState extends State<LocationScreen>
                           style: TextStyle(fontFamily: "MontserratM"),
                         ),
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Color(0xffFF8D41),
+                          foregroundColor: const Color(0xffFF8D41),
                           backgroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
@@ -632,10 +646,10 @@ class _LocationScreenState extends State<LocationScreen>
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                           child: Divider(
                             thickness: 1,
-                            color: const Color(0xffFF8D41),
+                            color: Color(0xffFF8D41),
                           ),
                         ),
                         Text(
@@ -645,10 +659,10 @@ class _LocationScreenState extends State<LocationScreen>
                             color: Colors.black,
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           child: Divider(
                             thickness: 1,
-                            color: const Color(0xffFF8D41),
+                            color: Color(0xffFF8D41),
                           ),
                         ),
                       ],
@@ -688,18 +702,19 @@ class _LocationScreenState extends State<LocationScreen>
                       onPressed: () {
                         Navigator.pop(context, _locationMessage);
                       },
-                      child: const Text(
-                        "Confirm Location",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: "MontserratSB",
-                            fontSize: 14),
-                      ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xffFF8D41),
+                        backgroundColor: const Color(0xffFF8D41),
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text(
+                        "Confirm Location",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: "MontserratSB",
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -739,19 +754,19 @@ class _LocationScreenState extends State<LocationScreen>
                       onPressed: () {
                         Navigator.pop(context, _locationMessage);
                       },
-                      child: const Text(
-                        "Confirm Location",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: "MontserratSB",
-                            fontSize: 14),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
+                      ),
+                      child: const Text(
+                        "Confirm Location",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "MontserratSB",
+                            fontSize: 14),
                       ),
                     ),
                   ],
